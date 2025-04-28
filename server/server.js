@@ -4,6 +4,8 @@ const admin = require('firebase-admin');
 const { getFirestore } = require('firebase-admin/firestore');
 require('dotenv').config(); // Load .env file
 
+// Force Firestore to use HTTP instead of gRPC
+process.env.FIRESTORE_USE_HTTP = 'true';
 
 // Initialize Firebase Admin SDK securely using environment variables
 const serviceAccount = {
