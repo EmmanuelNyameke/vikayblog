@@ -2,34 +2,19 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const { getFirestore } = require('firebase-admin/firestore');
-require('dotenv').config(); // Load .env file
+const path = require('path');
 
-// Force Firestore to use HTTP instead of gRPC
-process.env.FIRESTORE_USE_HTTP = 'true';
-
-// Initialize Firebase Admin SDK securely using environment variables
-const serviceAccount = {
-  type: process.env.FIREBASE_TYPE,
-  project_id: process.env.FIREBASE_PROJECT_ID,
-  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-  private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'), // important to fix line breaks
-  client_email: process.env.FIREBASE_CLIENT_EMAIL,
-  client_id: process.env.FIREBASE_CLIENT_ID,
-  auth_uri: process.env.FIREBASE_AUTH_URI,
-  token_uri: process.env.FIREBASE_TOKEN_URI,
-  auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
-  client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
-};
+// Initialize Firebase Admin SDK
+const firebaseConfig = require(path.join(__dirname, 'firebaseConfig.json'));
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(firebaseConfig)
 });
 
 const db = getFirestore();
 
 const app = express();
-const PORT = process.env.PORT || 7000; // Use environment PORT on production
-
+const PORT = 7000;
 
 app.use(cors());
 app.use(express.json());
