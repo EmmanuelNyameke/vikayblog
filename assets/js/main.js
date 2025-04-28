@@ -7,7 +7,7 @@ function fetchFromPythonOrNode(apiPath, callback) {
         .then(data => callback(data, "python"))
         .catch(err => {
             console.warn("Python backend not available, falling back to Node backend:", err.message);
-            fetch(`http://127.0.0.1:7000${apiPath}`)
+            fetch(`https://vikayblog.onrender.com${apiPath}`)
                 .then(res => res.json())
                 .then(data => callback(data, "node"))
                 .catch(err => console.error("Failed to fetch from both backends:", err));
@@ -103,7 +103,7 @@ historyList.addEventListener("click", (e) => {
 
 
 function searchNews(query) {
-    fetch(`http://127.0.0.1:7000/api/news/edited`)
+    fetch(`https://vikayblog.onrender.com/api/news/edited`)
         .then(res => res.json())
         .then(data => {
             const container = document.getElementById("news-list");
@@ -235,7 +235,7 @@ function fetchNews() {
 function syncNewsToNodeBackend(){
     fetch(`http://127.0.0.1:9000/api/news/edited?skip=${page * limit}&limit=${limit}`).then(res => res.json()).then(data => {
         data.results.forEach(news => {
-            fetch("http://127.0.0.1:7000/api/news/store", {
+            fetch("https://vikayblog.onrender.com/api/news/store", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

@@ -37,13 +37,12 @@ function loadNewsDetails(){
         return;
     }
 
-    fetch(`http://127.0.0.1:7000/api/news/edited/${newsId}`)
+    fetch(`https://vikayblog.onrender.com/api/news/edited/${newsId}`)
         .then(res => {
             if (!res.ok) throw new Error("News not found");
             return res.json();
         })
         .then(news => {
-            const timeAgo = getTimeAgo(news.created_at);
             document.title = news.title;
             document.getElementById("news-detail").innerHTML = `
                 <h1>${news.title}</h1>
