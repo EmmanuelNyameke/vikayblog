@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Welcome back, Kay</title>
+        <link href="../assets/css/dashboard.css" rel="stylesheet" />
+        <link rel="stylesheet" href="../assets/css/main.css" />
+    </head>
+    <body>
+      <header>
+        <h1>
+            <span class="logo-initials">WB</span>Web Blogster</h1>
+        <p>Authenticity is Our Hallmark</p>
+    </header>
+        <div class="container">
+            <h2>News Dashboard</h2>
+            <div id="news-list"></div>
+          </div>
+          <div class="pagination">
+            <button onclick="prevPage()">&laquo;</button>
+            <span id="page-info"></span>
+            <button onclick="nextPage()">&raquo;</button>
+        </div>
+          <div>
+            <button onclick="logout()" class="logout">Logout</button>
+          </div>
+        
+          <!-- Edit Modal -->
+          <div id="editModal" class="modal" style="display:none;">
+            <div class="modal-content">
+              <span id="closeModal" style="float:right; cursor:pointer;">&times;</span>
+              <h3>Edit News</h3>
+              <form id="editForm">
+                <input type="hidden" id="editId">
+                <div>
+                  <label for="editThumbnail">Thumbnail</label>
+                  <input type="text" id="editThumbnail" required>
+                </div>
+                <div>
+                  <label for="editTitle">Title</label>
+                  <input type="text" id="editTitle" required>
+                </div>
+                <div>
+                  <label for="editText">Content</label>
+                  <textarea id="editText" required></textarea>
+                </div>
+                <button type="submit">Save Changes</button>
+              </form>
+            </div>
+          </div>
+          <footer>
+            <p>Copyright&copy; 2025 Web Blogster. All rights reserved.</p>
+            <a href="terms.html" class="terms-link">Terms of Service |</a>
+            <a href="privacy.html" class="privacy-link">Privacy Policy</a>
+        </footer>
+          <script src="../assets/js/dashboard.js"></script>
+    </body>
+</html>

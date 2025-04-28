@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Create Account</title>
+        <link href="../assets/css/auth.css" rel="stylesheet" />
+        <link rel="stylesheet" href="../assets/css/main.css" />
+    </head>
+    <body>
+        <header>
+            <h1>
+                <span class="logo-initials">WB</span>Web Blogster</h1>
+            <p>Authenticity is Our Hallmark</p>
+        </header>
+        <div class="container">
+            <form class="form-card" id="registerForm">
+                <h2 class="form-title">Create Account</h2>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required />
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required />
+                </div>
+                <div class="form-group">
+                    <button type="submit" id="register-btn">Register</button>
+                </div>
+                <div id="message" class="form-group"></div>
+            </form>
+        </div>
+        <footer>
+            <p>Copyright&copy; 2025 Web Blogster. All rights reserved.</p>
+            <a href="terms.html" class="terms-link">Terms of Service |</a>
+            <a href="privacy.html" class="privacy-link">Privacy Policy</a>
+        </footer>
+        <script src="../assets/js/auth.js"></script>
+    </body>
+</html>

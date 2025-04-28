@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Web Blogster - Your go-to platform for the latest news and articles." />
+        <meta name="keywords" content="news, articles, blog, web blogster" />
+        <title>Web Blogster | News Made Easy</title>
+        <link href="assets/css/main.css" rel="stylesheet" />
+    </head>
+    <body>
+        <header>
+            <h1>
+                <span class="logo-initials">WB</span>Web Blogster</h1>
+            <p>Authenticity is Our Hallmark</p>
+        </header>
+        <div id="carousel-container">
+            <h2 class="carousel-title">Latest News</h2>
+            <div id="carousel"></div>
+        </div>
+        <form id="search-form" class="search-bar">
+                <input type="text" id="search-input" placeholder="Search news..." autocomplete="off" />
+                <span id="clear-search" class="clear-btn" title="Clear">&times;</span>
+                <ul id="search-history" class="history-list"></ul>
+        </form>
+        <div class="news-container">
+            <h3 class="h3">News</h3>
+            <div id="news-list"></div>
+          </div>
+        <div class="pagination">
+            <button onclick="prevPage()">&laquo;</button>
+            <span id="page-info"></span>
+            <button onclick="nextPage()">&raquo;</button>
+        </div>
+        <footer>
+            <p>Copyright&copy; 2025 Web Blogster. All rights reserved.</p>
+            <br/>
+            <a href="terms.html" class="terms-link">Terms of Service |</a>
+            <a href="privacy.html" class="privacy-link">Privacy Policy</a>
+        </footer>
+        <script src="assets/js/main.js"></script>
+    </body>
+</html>
