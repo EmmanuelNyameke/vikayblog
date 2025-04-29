@@ -4,15 +4,19 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const { getFirestore } = require('firebase-admin/firestore');
-const fs = require('fs');
 
-// Initialize Firebase Admin SDK
 let credentials;
 
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  credentials = JSON.parse(fs.readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'utf8'));
+// Use JSON string from FIREBASE_CONFIG environment variable
+if (process.env.FIREBASE_CONFIG) {
+  try {
+    credentials = JSON.parse(process.env.FIREBASE_CONFIG);
+  } catch (error) {
+    console.error("Invalid JSON in FIREBASE_CONFIG:", error);
+    process.exit(1);
+  }
 } else {
-  throw new Error("GOOGLE_APPLICATION_CREDENTIALS is not set in environment variables.");
+  throw new Error("FIREBASE_CONFIG environment variable is not set.");
 }
 
 admin.initializeApp({
