@@ -233,19 +233,21 @@ function syncNewsToNodeBackend(){
 }
 
 
-function nextPage(){
-    if((page + 1) * limit < total){
+function nextPage() {
+    const maxPages = Math.ceil(total / limit);
+    if (page + 1 < maxPages) {
         page++;
         fetchNews();
     }
 }
 
-function prevPage(){
-    if(page > 0){
+function prevPage() {
+    if (page > 0) {
         page--;
         fetchNews();
     }
 }
+
 
 window.onload = () => {
     fetchCarouselNews();
