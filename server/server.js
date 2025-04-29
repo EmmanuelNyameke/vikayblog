@@ -5,7 +5,7 @@ const { getFirestore } = require('firebase-admin/firestore');
 const path = require('path');
 
 // Initialize Firebase Admin SDK
-const firebaseConfig = require(path.join(__dirname, 'firebaseConfig.json'));
+const firebaseConfig = require('./firebaseConfig.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(firebaseConfig)
