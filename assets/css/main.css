@@ -54,13 +54,6 @@ header p {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     background-color: lightgreen;
 }
-
-  
-  .lower-k {
-    position: relative;
-    top: 0.2em; /* move the 'K' down */
-    font-size: 0.9em; /* optionally shrink it a bit */
-  }
   
 
 a {
