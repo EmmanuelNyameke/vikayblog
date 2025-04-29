@@ -4,6 +4,9 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const { getFirestore } = require('firebase-admin/firestore');
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
+dayjs.extend(relativeTime);
 
 let credentials;
 
@@ -76,7 +79,15 @@ app.get('/api/news/edited', async (req, res) => {
 
     const results = [];
     snapshot.forEach(doc => {
-      results.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      const createdAt = data.created_at?.toDate?.(); // Ensure it's a JS Date
+      const timeAgo = createdAt ? dayjs(createdAt).fromNow() : 'Unknown time';
+
+      results.push({
+        id: doc.id,
+        ...data,
+        time_ago: timeAgo  // Include relative time
+      });
     });
 
     res.json({ results });
@@ -85,6 +96,7 @@ app.get('/api/news/edited', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 // Get single news by ID
 app.get('/api/news/edited/:id', async (req, res) => {
@@ -96,7 +108,11 @@ app.get('/api/news/edited/:id', async (req, res) => {
       return res.status(404).json({ message: "News not found" });
     }
 
-    res.json({ id: doc.id, ...doc.data() });
+    const data = doc.data();
+    const createdAt = data.created_at?.toDate?.();
+    const timeAgo = createdAt ? dayjs(createdAt).fromNow() : 'Unknown time';
+
+    res.json({ id: doc.id, ...data, time_ago: timeAgo });
   } catch (error) {
     console.error("Error fetching single news:", error);
     res.status(500).json({ message: "Internal Server Error" });
