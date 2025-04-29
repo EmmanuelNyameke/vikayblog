@@ -56,7 +56,7 @@ loginForm.addEventListener("submit", function(e) {
             localStorage.setItem("username", body.username);
             messageBox.textContent = body.message;
             messageBox.style.color = "green";
-            window.location.href = "../../admin/dashboard.html"
+            window.location.href = "../../vikayblog/admin/dashboard.html"
         }
         else{
             messageBox.textContent = body.detail;
