@@ -180,26 +180,7 @@ function showSearchHistory(query){
     }
 }
 
-// Helper function to calculate time ago
-// function getTimeAgo(created_at) {
-//     const now = new Date();
-//     const postDate = new Date(created_at);
-//     const diffMs = now - postDate;
 
-//     const seconds = Math.floor(diffMs / 1000);
-//     const minutes = Math.floor(diffMs / (1000 * 60));
-//     const hours = Math.floor(diffMs / (1000 * 60 * 60));
-//     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-//     const months = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30));
-//     const years = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365));
-
-//     if (seconds < 60) return 'Just now';
-//     if (minutes < 60) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
-//     if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-//     if (days < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
-//     if (months < 12) return `${months} month${months > 1 ? 's' : ''} ago`;
-//     return `${years} year${years > 1 ? 's' : ''} ago`;
-// }
 
 
 let page = 0;
@@ -208,12 +189,13 @@ let total = 0;
 
 function fetchNews() {
     fetchFromPythonOrNode(`/api/news/edited?skip=${page * limit}&limit=${limit}`, (data, source) => {
-        total = data.total || data.length || 0;
+        total = data.total || 0;
+        const totalPages = data.totalPages || Math.ceil(total / limit);
+
         const container = document.getElementById("news-list");
         container.innerHTML = "";
 
-        (data.results || data).forEach(news => {
-            //const timeAgo = getTimeAgo(news.created_at);
+        (data.results || []).forEach(news => {
             const item = document.createElement("div");
             item.className = "news-item";
             item.innerHTML = `
@@ -227,10 +209,10 @@ function fetchNews() {
             container.appendChild(item);
         });
 
-        const totalPages = Math.ceil(total / limit);
         document.getElementById("page-info").innerText = `Page: ${page + 1} of ${totalPages}`;
     });
 }
+
 
 function syncNewsToNodeBackend(){
     fetch(`http://127.0.0.1:9000/api/news/edited?skip=${page * limit}&limit=${limit}`).then(res => res.json()).then(data => {

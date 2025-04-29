@@ -130,29 +130,6 @@ p #news-text {
     cursor: pointer;
 }
 
-/* Desktop styles */
-@media (min-width: 768px) {
-    .news-item {
-        width: 50%;
-        padding: 15px 30px;
-    }
-    .news-item:nth-child(odd){
-        padding-right: 40px;
-    }
-    .news-item:nth-child(even){
-        padding-left: 40px;
-    }
-    .news-container::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 50%;
-        width: 2px;
-        background-color: #ccc;
-        transform: translateX(-50%);
-    }
-}
 
 .news-item:hover {
     transform: scale(1.01);
