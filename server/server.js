@@ -65,12 +65,18 @@ app.post('/api/news/store', async (req, res) => {
   }
 });
 
-// Get all news with pagination
+
 app.get('/api/news/edited', async (req, res) => {
   try {
     const skip = parseInt(req.query.skip) || 0;
     const limit = parseInt(req.query.limit) || 20;
 
+    // Get total count
+    const totalSnapshot = await db.collection('news').get();
+    const total = totalSnapshot.size;
+    const totalPages = Math.ceil(total / limit);
+
+    // Get paginated results
     const snapshot = await db.collection('news')
       .orderBy('created_at', 'desc')
       .offset(skip)
@@ -80,22 +86,28 @@ app.get('/api/news/edited', async (req, res) => {
     const results = [];
     snapshot.forEach(doc => {
       const data = doc.data();
-      const createdAt = data.created_at?.toDate?.(); // Ensure it's a JS Date
+      const createdAt = data.created_at?.toDate?.();
       const timeAgo = createdAt ? dayjs(createdAt).fromNow() : 'Unknown time';
 
       results.push({
         id: doc.id,
         ...data,
-        time_ago: timeAgo  // Include relative time
+        time_ago: timeAgo
       });
     });
 
-    res.json({ results });
+    res.json({
+      total,
+      totalPages,
+      currentPage: Math.floor(skip / limit) + 1,
+      results
+    });
   } catch (error) {
     console.error('Error fetching news:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 // Get single news by ID
