@@ -1,0 +1,118 @@
+/* Global reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Body styling */
+body {
+    background: #f9f9f9;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    padding: 50px 20px;
+}
+
+/* Header styling */
+header {
+    background-color: green;
+    padding: 10px 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-bottom: 2px solid lime;
+    margin-bottom: 50px;
+}
+
+header h1 {
+    margin: 0 0 10px;
+    font-size: 2.5rem;
+    color: whitesmoke;
+}
+
+header p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: whitesmoke;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.logo-initials {
+    position: absolute;
+    left: 0;
+    margin: 15px;
+    top: 0.4em;
+    font-size: 0.6em;
+    font-weight: bold;
+    background-color: white;
+    color: green;
+    padding: 2px 6px;
+    border-radius: 18px;
+    transform: translateX(-20%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.logo-initials:hover {
+    top: -1em;
+    transform: translateX(-20%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background-color: lightgreen;
+}
+
+  
+  .lower-k {
+    position: relative;
+    top: 0.2em; /* move the 'K' down */
+    font-size: 0.9em; /* optionally shrink it a bit */
+  }
+  
+
+a {
+    text-decoration: none;
+    color: #0077cc;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Container */
+#news-detail {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+h2 #news-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #343a40;
+}
+
+img #news-thumbnail {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+p #news-text {
+    font-size: 1.125rem;
+    line-height: 1.8;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}

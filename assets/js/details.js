@@ -45,9 +45,9 @@ function loadNewsDetails(){
         .then(news => {
             document.title = news.title;
             document.getElementById("news-detail").innerHTML = `
-                <h1>${news.title}</h1>
-                <img src="${news.thumbnail}" width="400">
-                <p>${news.original_text}</p>
+                <h1 id="news-title">${news.title}</h1>
+                <img src="${news.thumbnail}" id="news-thumbnail" width="400">
+                <p id="news-text">${news.original_text}</p>
                 <a href="index.html">Back to News</a>
             `;
         })

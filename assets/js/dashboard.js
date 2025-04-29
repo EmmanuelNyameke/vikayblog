@@ -1,7 +1,7 @@
 // Token validation: prevent access if not logged in
 const token = localStorage.getItem("token");
 if(!token){
-  window.location.href = "../../vikayblog/auth/login.html" // Redirect if not logged in
+  window.location.href = "../../auth/login.html" // Redirect if not logged in
 }
 else{
   // Validate token by calling protected backend endpoint
@@ -9,13 +9,13 @@ else{
     headers: { "Authorization": `Bearer ${token}`}
   }).then(res => {
     if(!res.ok){
-      window.location.href = "../../vikayblog/auth/login.html";
+      window.location.href = "../../auth/login.html";
     }
     else{
       fetchNews();
     }
   }).catch(() => {
-    window.location.href = "../../vikayblog/auth/login.html";
+    window.location.href = "../../auth/login.html";
   });
 }
 
@@ -142,5 +142,5 @@ const API_BASE = "http://127.0.0.1:9000/api";
 
   function logout(){
     localStorage.clear();
-    window.location.href = "../../vikayblog/auth/login.html";
+    window.location.href = "../../auth/login.html";
   }
