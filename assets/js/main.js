@@ -202,7 +202,7 @@ function fetchNews() {
                 <a href="details.html?id=${news.id}">
                     <img src="${news.thumbnail}" width="100%" style="cursor: pointer;">
                     <h3>${news.title}</h3>
-                    <small>${news.time_ago}</small>
+                    <small><em>${news.time_ago}</em></small>
                 </a>
                 <hr>
             `;

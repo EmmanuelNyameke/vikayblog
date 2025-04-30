@@ -47,7 +47,7 @@ function loadNewsDetails(){
             document.getElementById("news-detail").innerHTML = `
                 <h1 id="news-title">${news.title}</h1>
                 <img src="${news.thumbnail}" id="news-thumbnail" width="400">
-                <small>Published ${news.time_ago}</small>
+                <small><em>Published ${news.time_ago}</em></small>
                 <p id="news-text">${news.original_text}</p>
                 <a href="index.html">Back to News</a>
             `;
