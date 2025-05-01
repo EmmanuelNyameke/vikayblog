@@ -57,7 +57,7 @@ app.post('/api/news/store', async (req, res) => {
       created_at: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    const postUrl = `https://${process.env.GITHUB_USERNAME}.github.io/details.html?id=${id}`;
+    const postUrl = `https://${process.env.GITHUB_USERNAME}.github.io/vikayblog/details.html?id=${id}`;
 
     // --- Post to Twitter ---
     const twitterClient = new TwitterApi({
