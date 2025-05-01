@@ -35,6 +35,16 @@ const PORT = process.env.PORT || 7000;
 app.use(cors());
 app.use(express.json());
 
+
+function slugify(title) {
+  return title
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\W-]+/g, '-') // Replace spaces & special chars with dashes
+    .replace(/^-+|-+$/g, '');  // Remove leading/trailing dashes
+}
+
 // Store new news item and post to Twitter/Facebook
 app.post('/api/news/store', async (req, res) => {
   try {
@@ -42,6 +52,8 @@ app.post('/api/news/store', async (req, res) => {
     if (!id || !title || !original_text || !thumbnail) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+
+    const slug = slugify(title);
 
     const newsRef = db.collection('news').doc(id.toString());
     const existingDoc = await newsRef.get();
@@ -52,6 +64,7 @@ app.post('/api/news/store', async (req, res) => {
     await newsRef.set({
       id,
       title,
+      slug,
       original_text,
       thumbnail,
       created_at: admin.firestore.FieldValue.serverTimestamp()
@@ -130,6 +143,26 @@ app.get('/api/news/edited/:id', async (req, res) => {
     res.json({ id: doc.id, ...data, time_ago: timeAgo });
   } catch (error) {
     console.error("Error fetching single news:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Get single news by slug
+app.get('/api/news/slug/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const snapshot = await db.collection('news').where('slug', '==', slug).limit(1).get();
+
+    if (snapshot.empty) return res.status(404).json({ message: "News not found" });
+
+    const doc = snapshot.docs[0];
+    const data = doc.data();
+    const createdAt = data.created_at?.toDate?.();
+    const timeAgo = createdAt ? dayjs(createdAt).fromNow() : 'Unknown time';
+
+    res.json({ id: doc.id, ...data, time_ago: timeAgo });
+  } catch (error) {
+    console.error("Error fetching news by slug:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
