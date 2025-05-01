@@ -37,7 +37,7 @@ function loadNewsDetails(){
         return;
     }
 
-    fetch(`https://vikayblog.onrender.com/api/news/edited/${slug}`)
+    fetch(`https://vikayblog.onrender.com/api/news/edited/slug/${slug}`)
         .then(res => {
             if (!res.ok) throw new Error("News not found");
             return res.json();
