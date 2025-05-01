@@ -7,6 +7,14 @@ const { getFirestore } = require('firebase-admin/firestore');
 const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
 dayjs.extend(relativeTime);
+const { TwitterApi } = require('twitter-api-v2');
+const twitterClient = new TwitterApi({
+  appKey: process.env.TWITTER_API_KEY,
+  appSecret: process.env.TWITTER_API_SECRET,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN,
+  accessSecret: process.env.TWITTER_ACCESS_SECRET,
+});
+
 
 let credentials;
 
@@ -58,7 +66,13 @@ app.post('/api/news/store', async (req, res) => {
       created_at: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    res.status(201).json({ message: "News stored successfully!" });
+    // Tweet the news link
+
+    const newsUrl = `https://emmanuelnyameke.github.io/vikayblog/details.html?id=${id}`;
+    const tweet = `${thumbnail}\n${title}\n\nRead more: ${newsUrl}`;
+    await twitterClient.v2.tweet(tweet);
+
+    res.status(201).json({ message: "News stored and tweeted successfully!" });
   } catch (error) {
     console.error("Error storing news:", error);
     res.status(500).json({ message: "Internal Server Error" });
