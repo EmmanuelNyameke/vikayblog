@@ -66,7 +66,7 @@ app.post('/api/news/store', async (req, res) => {
       accessToken: process.env.TWITTER_ACCESS_TOKEN,
       accessSecret: process.env.TWITTER_ACCESS_SECRET,
     });
-    await twitterClient.v2.tweet(`${thumbnail}\n${title}\nRead more: ${postUrl}`);
+    await twitterClient.v1.tweet(`${thumbnail}\n${title}\nRead more: ${postUrl}`);
 
     // --- Post to Facebook ---
     await axios.post(`https://graph.facebook.com/${process.env.FB_PAGE_ID}/feed`, {
