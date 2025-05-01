@@ -1,5 +1,5 @@
 require('dotenv').config(); // Load .env variables
-
+const builder = require('xmlbuilder');
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -164,6 +164,34 @@ app.get('/api/news/edited/slug/:slug', async (req, res) => {
   } catch (error) {
     console.error("Error fetching news by slug:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const snapshot = await db.collection('news').orderBy('created_at', 'desc').get();
+
+    const urlSet = builder.create('urlset', { encoding: 'UTF-8' })
+      .att('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const slug = data.slug;
+      const updatedAt = data.created_at?.toDate()?.toISOString() || new Date().toISOString();
+      const fullUrl = `https://emmanuelnyameke.github.io/vikayblog/details.html?slug=${slug}`; // Adjust to match your frontend
+
+      urlSet.ele('url')
+        .ele('loc', {}, fullUrl).up()
+        .ele('lastmod', {}, updatedAt).up()
+        .ele('changefreq', {}, 'weekly').up()
+        .ele('priority', {}, '0.8');
+    });
+
+    res.header('Content-Type', 'application/xml');
+    res.send(urlSet.end({ pretty: true }));
+  } catch (error) {
+    console.error("Error generating sitemap:", error);
+    res.status(500).send("Could not generate sitemap");
   }
 });
 
