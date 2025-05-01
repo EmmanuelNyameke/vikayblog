@@ -168,7 +168,7 @@ app.get('/api/news/edited/slug/:slug', async (req, res) => {
 });
 
 // Fix missing slugs for existing news documents
-app.get('/api/news/edited/fix-slugs', async (req, res) => {
+app.get('/api/news/fix-slugs', async (req, res) => {
   try {
     const snapshot = await db.collection('news').get();
     let updatedCount = 0;
