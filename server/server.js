@@ -167,6 +167,30 @@ app.get('/api/news/edited/slug/:slug', async (req, res) => {
   }
 });
 
+// Fix missing slugs for existing news documents
+app.get('/api/news/edited/fix-slugs', async (req, res) => {
+  try {
+    const snapshot = await db.collection('news').get();
+    let updatedCount = 0;
+
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+
+      if (!data.slug && data.title) {
+        const slug = slugify(data.title);
+        await doc.ref.update({ slug });
+        updatedCount++;
+        console.log(`Added slug to: ${data.title}`);
+      }
+    }
+
+    res.json({ message: `Slugs fixed for ${updatedCount} documents.` });
+  } catch (error) {
+    console.error("Error fixing slugs:", error);
+    res.status(500).json({ message: "Failed to fix slugs" });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
