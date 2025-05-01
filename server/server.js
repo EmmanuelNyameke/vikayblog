@@ -148,7 +148,7 @@ app.get('/api/news/edited/:id', async (req, res) => {
 });
 
 // Get single news by slug
-app.get('/api/news/slug/:slug', async (req, res) => {
+app.get('/api/news/edited/:slug', async (req, res) => {
   try {
     const { slug } = req.params;
     const snapshot = await db.collection('news').where('slug', '==', slug).limit(1).get();
