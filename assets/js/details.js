@@ -30,14 +30,14 @@ function getTimeAgo(created_at) {
 }
 
 function loadNewsDetails(){
-    const newsId = getQueryParam("id");
-    if (!newsId) {
+    const slug = getQueryParam("slug");
+    if (!slug) {
         document.getElementById("news-detail").innerText = "News not found.";
         document.title = "News not found";
         return;
     }
 
-    fetch(`https://vikayblog.onrender.com/api/news/edited/${newsId}`)
+    fetch(`https://vikayblog.onrender.com/api/news/edited/${slug}`)
         .then(res => {
             if (!res.ok) throw new Error("News not found");
             return res.json();

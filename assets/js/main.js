@@ -24,7 +24,7 @@ function fetchCarouselNews() {
             const item = document.createElement("div");
             item.className = "carousel-item";
             item.innerHTML = `
-                <a href="details.html?id=${news.id}">
+                <a href="details.html?slug=${news.slug}">
                     <img src="${news.thumbnail}" alt="${news.title}">
                     <h3>${news.title}</h3>
                 </a>
@@ -139,7 +139,7 @@ function searchNews(query) {
                 );
 
                 item.innerHTML = `
-                    <a href="details.html?id=${news.id}">
+                    <a href="details.html?slug=${news.slug}">
                         <img src="${news.thumbnail}" width="100%" alt="${news.title}">
                         <h3>${titleWithHighlight}</h3>
                     </a>
@@ -199,7 +199,7 @@ function fetchNews() {
             const item = document.createElement("div");
             item.className = "news-item";
             item.innerHTML = `
-                <a href="details.html?id=${news.id}">
+                <a href="details.html?slug=${news.slug}">
                     <img src="${news.thumbnail}" width="100%" style="cursor: pointer;">
                     <h3>${news.title}</h3>
                     <small><em>${news.time_ago}</em></small>
