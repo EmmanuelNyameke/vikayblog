@@ -49,13 +49,22 @@ function loadNewsDetails(){
                 <img src="${news.thumbnail}" id="news-thumbnail" width="400">
                 <small><em>Published ${news.time_ago}</em></small>
                 <p id="news-text">${news.original_text}</p>
-                <button id="share-button">Share this News</button>
                 <div class="share-buttons">
-                <button id="share-button" title="Share with device"><i class="fas fa-share-alt"></i> Share</button>
-                <a href="https://wa.me/?text=${encodeURIComponent(news.title)}%20${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn whatsapp" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn facebook" title="Share on Facebook"><i class="fab fa-facebook"></i></a>
-                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(news.title)}&url=${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn twitter" title="Share on X (Twitter)"><i class="fab fa-x-twitter"></i></a>
-                <button id="copy-link-btn" class="social-btn copy" title="Copy link"><i class="fas fa-link"></i></button>
+                <button id="share-button" title="Share with device">
+                <i class="bi bi-share-fill"></i> Share
+                </button>
+                <a href="#" class="social-btn whatsapp" title="Share on WhatsApp">
+                <i class="bi bi-whatsapp"></i>
+                </a>
+                <a href="#" class="social-btn facebook" title="Share on Facebook">
+                <i class="bi bi-facebook"></i>
+                </a>
+                <a href="#" class="social-btn twitter" title="Share on X">
+                <i class="bi bi-twitter-x"></i>
+                </a>
+                <button id="copy-link-btn" class="social-btn copy" title="Copy link">
+                <i class="bi bi-link-45deg"></i>
+                </button>
                 </div>
 
                 <p id="share-status"></p>
