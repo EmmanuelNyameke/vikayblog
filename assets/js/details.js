@@ -56,10 +56,10 @@ function loadNewsDetails(){
                 <a href="https://wa.me/?text=${encodeURIComponent(news.title)}%20${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn whatsapp" title="Share on WhatsApp">
                 <i class="bi bi-whatsapp"></i>
                 </a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}" target="_blank"" class="social-btn facebook" title="Share on Facebook">
+                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn facebook" title="Share on Facebook">
                 <i class="bi bi-facebook"></i>
                 </a>
-                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(news.title)}&url=${encodeURIComponent(window.location.href)}" target="_blank"" class="social-btn twitter" title="Share on X">
+                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(news.title)}&url=${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn twitter" title="Share on X">
                 <i class="bi bi-twitter-x"></i>
                 </a>
                 <button id="copy-link-btn" class="social-btn copy" title="Copy link">
