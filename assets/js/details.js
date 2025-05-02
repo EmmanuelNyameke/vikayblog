@@ -48,7 +48,17 @@ function loadNewsDetails(){
                 <h1 id="news-title">${news.title}</h1>
                 <img src="${news.thumbnail}" id="news-thumbnail" width="400">
                 <small><em>Published ${news.time_ago}</em></small>
-                <p id="news-text">${news.original_text}</p>
+                <div id="news-text">${news.original_text}</div>
+                <button id="share-button">Share this News</button>
+                <div class="share-buttons">
+                <button id="share-button" title="Share with device"><i class="fas fa-share-alt"></i> Share</button>
+                <a href="https://wa.me/?text=${encodeURIComponent(news.title)}%20${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn whatsapp" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn facebook" title="Share on Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(news.title)}&url=${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn twitter" title="Share on X (Twitter)"><i class="fab fa-x-twitter"></i></a>
+                <button id="copy-link-btn" class="social-btn copy" title="Copy link"><i class="fas fa-link"></i></button>
+                </div>
+
+                <p id="share-status"></p>
                 <a href="index.html">Back to News</a>
             `;
         })
@@ -58,3 +68,31 @@ function loadNewsDetails(){
         });
 }
 window.onload = loadNewsDetails;
+
+document.addEventListener("click", function (e) {
+    if (e.target.closest("#share-button")) {
+      const shareData = {
+        title: document.getElementById("news-title").innerText,
+        text: "Check out this news on ViKay Blog:",
+        url: window.location.href
+      };
+  
+      if (navigator.share) {
+        navigator.share(shareData)
+          .then(() => document.getElementById("share-status").innerText = "Thanks for sharing!")
+          .catch((err) => console.error("Sharing failed:", err));
+      } else {
+        document.getElementById("share-status").innerText = "Web Share not supported on this device.";
+      }
+    }
+  
+    if (e.target.closest("#copy-link-btn")) {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        document.getElementById("share-status").innerText = "Link copied to clipboard!";
+      }).catch(() => {
+        document.getElementById("share-status").innerText = "Failed to copy link.";
+        document.getElementById("share-status").style.color = "red";
+      });
+    }
+  });
+  
