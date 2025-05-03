@@ -29,16 +29,6 @@ function getTimeAgo(created_at) {
     return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
-function setMeta(nameOrProp, content, isProperty = false) {
-  let selector = isProperty ? `meta[property="${nameOrProp}"]` : `meta[name="${nameOrProp}"]`;
-  let meta = document.querySelector(selector);
-  if (!meta) {
-    meta = document.createElement("meta");
-    meta.setAttribute(isProperty ? "property" : "name", nameOrProp);
-    document.head.appendChild(meta);
-  }
-  meta.setAttribute("content", content);
-}
 
 function loadNewsDetails(){
     const slug = getQueryParam("slug");
@@ -54,10 +44,8 @@ function loadNewsDetails(){
             return res.json();
         })
         .then(news => {
-          const url = window.location.href;
-          const description = news.original_text.substring(0, 60);
-            document.title = news.title;
-            document.getElementById("news-detail").innerHTML = `
+          document.title = news.title;
+          document.getElementById("news-detail").innerHTML = `
                 <h1 id="news-title">${news.title}</h1>
                 <img src="${news.thumbnail}" id="news-thumbnail" width="400">
                 <small><em>Published ${news.time_ago}</em></small>
@@ -83,20 +71,18 @@ function loadNewsDetails(){
                 <p id="share-status"></p>
                 <a href="index.html">Back to News</a>
             `;
-            // Update Meta Tags
-          setMeta("description", description);
-          setMeta("keywords", "ViKay Blog, news, articles, latest, blog");
-          setMeta("author", "ViKay Blog");
-          setMeta("robots", "index, follow");
-          setMeta("og:title", news.title, true);
-          setMeta("og:description", description, true);
-          setMeta("og:image", news.thumbnail, true);
-          setMeta("og:url", url, true);
-          setMeta("og:type", "article", true);
-          setMeta("twitter:title", news.title);
-          setMeta("twitter:description", description);
-          setMeta("twitter:image", news.thumbnail);
-          setMeta("twitter:site", "@ViKayBlog");
+            // Update meta tags for SEO & sharing
+          document.getElementById("og-title").content = news.title;
+          document.getElementById("og-description").content = news.original_text.slice(0, 50);
+          document.getElementById("og-image").content = news.thumbnail;
+          document.getElementById("og-url").content = window.location.href;
+
+          document.getElementById("twitter-title").content = news.title;
+          document.getElementById("twitter-description").content = news.original_text.slice(0, 50);
+          document.getElementById("twitter-image").content = news.thumbnail;
+
+          // Update favicon to news thumbnail
+          document.getElementById("dynamic-favicon").href = news.thumbnail;
 
           // Canonical URL
           let canonical = document.querySelector('link[rel="canonical"]');
@@ -140,6 +126,5 @@ document.addEventListener("click", function (e) {
       });
     }
   });
-
-window.onload = loadNewsDetails;
   
+  window.onload = loadNewsDetails;
