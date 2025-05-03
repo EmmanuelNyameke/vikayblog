@@ -85,13 +85,12 @@ function loadNewsDetails(){
           document.getElementById("dynamic-favicon").href = news.thumbnail;
 
           // Canonical URL
-          let canonical = document.querySelector('link[rel="canonical"]');
-          if (!canonical) {
-            canonical = document.createElement("link");
-            canonical.setAttribute("rel", "canonical");
-            document.head.appendChild(canonical);
-          }
-          canonical.setAttribute("href", url);
+          // Set canonical URL
+          const canonical = document.getElementById("canonical-link");
+          if (canonical) {
+              canonical.href = window.location.href.split("#")[0]; // Strip fragment if present
+            }
+
         })
         .catch(err => {
             console.error("Error fetching or displaying news: ", err);
