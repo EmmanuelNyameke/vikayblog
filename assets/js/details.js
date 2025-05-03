@@ -29,6 +29,17 @@ function getTimeAgo(created_at) {
     return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
+function setMeta(nameOrProp, content, isProperty = false) {
+  let selector = isProperty ? `meta[property="${nameOrProp}"]` : `meta[name="${nameOrProp}"]`;
+  let meta = document.querySelector(selector);
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute(isProperty ? "property" : "name", nameOrProp);
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute("content", content);
+}
+
 function loadNewsDetails(){
     const slug = getQueryParam("slug");
     if (!slug) {
