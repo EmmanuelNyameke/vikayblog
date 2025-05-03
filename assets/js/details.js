@@ -112,7 +112,7 @@ function loadNewsDetails(){
             document.getElementById("news-detail").innerText = "Error loading news.";
         });
 }
-window.onload = loadNewsDetails;
+
 
 document.addEventListener("click", function (e) {
     if (e.target.closest("#share-button")) {
@@ -140,4 +140,6 @@ document.addEventListener("click", function (e) {
       });
     }
   });
+
+window.onload = loadNewsDetails;
   
