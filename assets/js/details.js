@@ -29,19 +29,6 @@ function getTimeAgo(created_at) {
     return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
-
-function setMeta(nameOrProp, content, isProperty = false) {
-  let selector = isProperty ? `meta[property="${nameOrProp}"]` : `meta[name="${nameOrProp}"]`;
-  let meta = document.querySelector(selector);
-  if (!meta) {
-    meta = document.createElement("meta");
-    meta.setAttribute(isProperty ? "property" : "name", nameOrProp);
-    document.head.appendChild(meta);
-  }
-  meta.setAttribute("content", content);
-}
-
-
 function loadNewsDetails(){
     const slug = getQueryParam("slug");
     if (!slug) {
@@ -57,23 +44,30 @@ function loadNewsDetails(){
         })
         .then(news => {
           const url = window.location.href;
-          const description = news.original_text.substring(0, 50);
-
-          document.title = news.title;
-          document.getElementById("news-detail").innerHTML = `
-              <h1 id="news-title">${news.title}</h1>
-              <img src="${news.thumbnail}" id="news-thumbnail" width="400">
-              <small><em>Published ${news.time_ago}</em></small>
-              <p id="news-text">${news.original_text}</p>
-
-              <div class="share-buttons">
-                <button id="share-button" title="Share with device"><i class="bi bi-share-fill"></i> Share</button>
-                <a href="https://wa.me/?text=${encodeURIComponent(news.title + ' ' + url)}" target="_blank" class="social-btn" title="Share on WhatsApp"><i class="bi bi-whatsapp"></i></a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" class="social-btn" title="Share on Facebook"><i class="bi bi-facebook"></i></a>
-                <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(news.title)}" target="_blank" class="social-btn" title="Share on X"><i class="bi bi-twitter-x"></i></a>
-                <button id="copy-link-btn" class="social-btn" title="Copy link"><i class="bi bi-link-45deg"></i></button>
-              </div>
-
+          const description = news.original_text.substring(0, 60);
+            document.title = news.title;
+            document.getElementById("news-detail").innerHTML = `
+                <h1 id="news-title">${news.title}</h1>
+                <img src="${news.thumbnail}" id="news-thumbnail" width="400">
+                <small><em>Published ${news.time_ago}</em></small>
+                <p id="news-text">${news.original_text}</p>
+                <div class="share-buttons">
+                <button id="share-button" title="Share with device">
+                <i class="bi bi-share-fill"></i> Share
+                </button>
+                <a href="https://wa.me/?text=${encodeURIComponent(news.title)}%20${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn whatsapp" title="Share on WhatsApp">
+                <i class="bi bi-whatsapp"></i>
+                </a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn facebook" title="Share on Facebook">
+                <i class="bi bi-facebook"></i>
+                </a>
+                <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(news.title)}&url=${encodeURIComponent(window.location.href)}" target="_blank" class="social-btn twitter" title="Share on X">
+                <i class="bi bi-twitter-x"></i>
+                </a>
+                <button id="copy-link-btn" class="social-btn copy" title="Copy link">
+                <i class="bi bi-link-45deg"></i>
+                </button>
+                </div>
 
                 <p id="share-status"></p>
                 <a href="index.html">Back to News</a>
@@ -107,12 +101,13 @@ function loadNewsDetails(){
             document.getElementById("news-detail").innerText = "Error loading news.";
         });
 }
+window.onload = loadNewsDetails;
 
 document.addEventListener("click", function (e) {
     if (e.target.closest("#share-button")) {
       const shareData = {
         title: document.getElementById("news-title").innerText,
-        text: news.original_text.substring(0, 50),
+        text: news.original_text.substring(0, 60),
         url: window.location.href
       };
   
@@ -134,6 +129,4 @@ document.addEventListener("click", function (e) {
       });
     }
   });
-
-  window.onload = loadNewsDetails;
   
