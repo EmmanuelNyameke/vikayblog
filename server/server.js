@@ -178,7 +178,7 @@ app.get('/sitemap.xml', async (req, res) => {
       const data = doc.data();
       const slug = data.slug;
       const updatedAt = data.created_at?.toDate()?.toISOString() || new Date().toISOString();
-      const fullUrl = `https://emmanuelnyameke.github.io/vikayblog/details.html?slug=${slug}`; // Adjust to match your frontend
+      const fullUrl = `https://vikayblog.com/details.html?slug=${slug}`; // Adjust to match your frontend
 
       urlSet.ele('url')
         .ele('loc', {}, fullUrl).up()
