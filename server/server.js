@@ -4,6 +4,9 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const { TwitterApi } = require('twitter-api-v2');
+const fs = require('fs');
+const path = require('path');
+const Jimp = require('jimp');
 const admin = require('firebase-admin');
 const { getFirestore } = require('firebase-admin/firestore');
 const dayjs = require('dayjs');
@@ -44,6 +47,21 @@ function slugify(title) {
     .replace(/[\s\W-]+/g, '-') // Replace spaces & special chars with dashes
     .replace(/^-+|-+$/g, '');  // Remove leading/trailing dashes
 }
+
+// Overlay title text on image and return saved image path
+const overlayTitleOnImage = async(imageUrl, title) => {
+  const image = await Jimp.read(imageUrl);
+  const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
+  image.resize(800, Jimp.AUTO);
+  image.print(font, 20, 20, {
+    text: title,
+    alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
+    alignmentY: Jimp.VERTICAL_ALIGN_TOP
+  }, image.bitmap.width - 40);
+  const filePath = path.join(__dirname, 'temp_image.jpg');
+  await image.writeAsync(filePath);
+  return filePath;
+};
 
 // Store new news item and post to Twitter/Facebook
 app.post('/api/news/store', async (req, res) => {
@@ -99,7 +117,18 @@ app.post('/api/news/store', async (req, res) => {
       }
     }
 
-    await postTweetWithRetry(twitterClient, `${title}\nRead more: ${postUrl}`);
+    const imagePath = await overlayTitleOnImage(thumbnail, title);
+
+    const mediaId = await twitterClient.v2.uploadMedia(imagePath);
+    const postText = `${title}\nRead more: ${postUrl}`;
+
+    await twitterClient.v2.tweet({
+          text: postText,
+          media: { media_ids: [mediaId] }
+});
+
+    fs.unlinkSync(imagePath); // Clean up
+
     
 
     // --- Post to Facebook ---
