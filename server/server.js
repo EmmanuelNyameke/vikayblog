@@ -79,7 +79,28 @@ app.post('/api/news/store', async (req, res) => {
       accessToken: process.env.TWITTER_ACCESS_TOKEN,
       accessSecret: process.env.TWITTER_ACCESS_SECRET,
     });
-    await twitterClient.v2.tweet(`${title}\nRead more: ${postUrl}`);
+    async function postTweetWithRetry(client, message, maxRetries = 3) {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          await client.v2.tweet(message);
+          console.log('✅ Tweet posted');
+          return;
+        } catch (error) {
+          if (error.code === 429 && error.rateLimit?.reset) {
+            const resetTime = error.rateLimit.reset * 1000;
+            const waitTime = resetTime - Date.now();
+            console.warn(`⚠️ Twitter rate limit hit. Waiting ${Math.ceil(waitTime / 1000)}s before retrying...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime + 1000)); // wait a bit extra
+          } else {
+            console.error('❌ Twitter post failed:', error);
+            break;
+          }
+        }
+      }
+    }
+
+    await postTweetWithRetry(twitterClient, `${title}\nRead more: ${postUrl}`);
+    
 
     // --- Post to Facebook ---
     await axios.post(`https://graph.facebook.com/${process.env.FB_PAGE_ID}/feed`, {
