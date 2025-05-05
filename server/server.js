@@ -48,9 +48,28 @@ function slugify(title) {
     .replace(/^-+|-+$/g, '');  // Remove leading/trailing dashes
 }
 
+// Function to download image from URL
+const downloadImage = async (imageUrl, outputPath) => {
+  const response = await axios({
+    url: imageUrl,
+    method: 'GET',
+    responseType: 'stream',
+  });
+  response.data.pipe(fs.createWriteStream(outputPath));
+  return new Promise((resolve, reject) => {
+    response.data.on('end', resolve);
+    response.data.on('error', reject);
+  });
+};
+
 // Overlay title text on image and return saved image path
-const overlayTitleOnImage = async(imageUrl, title) => {
-  const image = await Jimp.read(imageUrl);
+  const overlayTitleOnImage = async (imageUrl, title) => {
+  const tempImagePath = path.join(__dirname, 'temp_image.jpg');
+  
+  // Download the image first if URL is provided
+  await downloadImage(imageUrl, tempImagePath);
+  
+  const image = await Jimp.read(tempImagePath);
   const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
   image.resize(800, Jimp.AUTO);
   image.print(font, 20, 20, {
@@ -58,9 +77,11 @@ const overlayTitleOnImage = async(imageUrl, title) => {
     alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
     alignmentY: Jimp.VERTICAL_ALIGN_TOP
   }, image.bitmap.width - 40);
-  const filePath = path.join(__dirname, 'temp_image.jpg');
-  await image.writeAsync(filePath);
-  return filePath;
+  
+  // Save the image with text overlay
+  await image.writeAsync(tempImagePath);
+  
+  return tempImagePath; // Return the path of the processed image
 };
 
 // Store new news item and post to Twitter/Facebook
