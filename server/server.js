@@ -63,26 +63,30 @@ const downloadImage = async (imageUrl, outputPath) => {
 };
 
 // Overlay title text on image and return saved image path
-  const overlayTitleOnImage = async (imageUrl, title) => {
+const overlayTitleOnImage = async (imageUrl, title) => {
   const tempImagePath = path.join(__dirname, 'temp_image.jpg');
-  
-  // Download the image first if URL is provided
+  const outputImagePath = path.join(__dirname, 'output_image.jpg');
+
   await downloadImage(imageUrl, tempImagePath);
-  
-  const image = await Jimp.read(tempImagePath);
-  const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
-  image.resize(800, Jimp.AUTO);
-  image.print(font, 20, 20, {
-    text: title,
-    alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
-    alignmentY: Jimp.VERTICAL_ALIGN_TOP
-  }, image.bitmap.width - 40);
-  
-  // Save the image with text overlay
-  await image.writeAsync(tempImagePath);
-  
-  return tempImagePath; // Return the path of the processed image
+
+  const svgOverlay = `
+    <svg width="800" height="100">
+      <style>
+        .title { fill: white; font-size: 32px; font-weight: bold; font-family: Arial, sans-serif; }
+      </style>
+      <text x="20" y="40" class="title">${title.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</text>
+    </svg>
+  `;
+
+  await sharp(tempImagePath)
+    .resize({ width: 800 })
+    .composite([{ input: Buffer.from(svgOverlay), top: 20, left: 0 }])
+    .jpeg({ quality: 90 })
+    .toFile(outputImagePath);
+
+  return outputImagePath;
 };
+
 
 // Store new news item and post to Twitter/Facebook
 app.post('/api/news/store', async (req, res) => {
@@ -140,7 +144,7 @@ app.post('/api/news/store', async (req, res) => {
 
     const imagePath = await overlayTitleOnImage(thumbnail, title);
 
-    const mediaId = await twitterClient.v2.uploadMedia(imagePath);
+    const mediaId = await twitterClient.v2.uploadMedia(imagePath, { mediaCategory: 'tweet_image' });
     const postText = `${title}\nRead more: ${postUrl}`;
 
     await twitterClient.v2.tweet({
