@@ -49,8 +49,7 @@ function loadNewsDetails(){
                 <h1 id="news-title">${news.title}</h1>
                 <img src="${news.thumbnail}" id="news-thumbnail" width="400">
                 <small><em>Published ${news.time_ago}</em></small>
-                <p id="news-text">${news.original_text}<br><br>
-                <strong>Source: ${news.channel}</strong></p>
+                <p id="news-text">${news.original_text}</p>
                 <div class="share-buttons">
                 <button id="share-button" title="Share with device">
                 <i class="bi bi-share-fill"></i> Share
