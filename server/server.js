@@ -87,8 +87,8 @@ const downloadImage = async (imageUrl, outputPath) => {
 // Store new news item and post to Twitter/Facebook
 app.post('/api/news/store', async (req, res) => {
   try {
-    const { id, title, original_text, thumbnail } = req.body;
-    if (!id || !title || !original_text || !thumbnail) {
+    const { id, title, original_text, thumbnail, channel } = req.body;
+    if (!id || !title || !original_text || !thumbnail || !channel) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -106,6 +106,7 @@ app.post('/api/news/store', async (req, res) => {
       slug,
       original_text,
       thumbnail,
+      channel,
       created_at: admin.firestore.FieldValue.serverTimestamp()
     });
 
