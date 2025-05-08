@@ -50,17 +50,32 @@ function slugify(title) {
 
 // Function to download image from URL
 const downloadImage = async (imageUrl, outputPath) => {
-  const response = await axios({
-    url: imageUrl,
-    method: 'GET',
-    responseType: 'stream',
-  });
-  response.data.pipe(fs.createWriteStream(outputPath));
-  return new Promise((resolve, reject) => {
-    response.data.on('end', resolve);
-    response.data.on('error', reject);
-  });
+  try {
+    // Make sure to follow redirects (max 5 hops) and allow for proper image stream response
+    const response = await axios.get(imageUrl, {
+      responseType: 'stream',
+      maxRedirects: 5, // Allow following redirects
+    });
+
+    // Check for the content type to ensure it's an image
+    if (!response.headers['content-type'].includes('image')) {
+      throw new Error('The URL does not return an image.');
+    }
+
+    const writer = fs.createWriteStream(outputPath);
+    response.data.pipe(writer);
+
+    // Return a promise that resolves when the image is downloaded
+    return new Promise((resolve, reject) => {
+      writer.on('finish', resolve);
+      writer.on('error', reject);
+    });
+  } catch (error) {
+    console.error('Error downloading image:', error.message);
+    throw error;
+  }
 };
+
 
 // Overlay title text on image and return saved image path
 const overlayTitleOnImage = async (imageUrl, title) => {
