@@ -159,7 +159,7 @@ app.post('/api/news/store', async (req, res) => {
 
     const imagePath = await overlayTitleOnImage(thumbnail, title);
 
-    const mediaId = await twitterClient.v2.uploadMedia(imagePath, { mediaCategory: 'tweet_image' });
+    const mediaId = await twitterClient.v2.uploadMedia(mediaPath, { type: 'jpg' });
     const postText = `${title}\nRead more: ${postUrl}`;
 
     await twitterClient.v2.tweet({
