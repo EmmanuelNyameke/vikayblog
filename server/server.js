@@ -56,7 +56,10 @@ const downloadImage = async (imageUrl, outputPath) => {
       maxRedirects: 5,
     });
 
-    // Ensure 'content-type' exists and is a valid string before calling .includes()
+    // Log the response headers and content
+    console.log('Response Headers:', response.headers);  // This will show if headers are missing or malformed
+    console.log('Response Content:', response.data);  // This shows the content of the response
+
     const contentType = response.headers['content-type'];
     if (typeof contentType !== 'string' || !contentType.includes('image')) {
       throw new Error('The URL does not return an image or the content-type is missing.');
@@ -74,6 +77,7 @@ const downloadImage = async (imageUrl, outputPath) => {
     throw error;
   }
 };
+
 
 
 
@@ -159,7 +163,7 @@ app.post('/api/news/store', async (req, res) => {
 
     const imagePath = await overlayTitleOnImage(thumbnail, title);
 
-    const mediaId = await twitterClient.v2.uploadMedia(mediaPath, { type: 'jpg' });
+    const mediaId = await twitterClient.v2.uploadMedia(imagePath, { mediaCategory: 'tweet_image' });
     const postText = `${title}\nRead more: ${postUrl}`;
 
     await twitterClient.v2.tweet({
