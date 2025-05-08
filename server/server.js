@@ -51,21 +51,20 @@ function slugify(title) {
 // Function to download image from URL
 const downloadImage = async (imageUrl, outputPath) => {
   try {
-    // Make sure to follow redirects (max 5 hops) and allow for proper image stream response
     const response = await axios.get(imageUrl, {
       responseType: 'stream',
-      maxRedirects: 5, // Allow following redirects
+      maxRedirects: 5,
     });
 
-    // Check for the content type to ensure it's an image
-    if (!response.headers['content-type'].includes('image')) {
-      throw new Error('The URL does not return an image.');
+    // Ensure 'content-type' exists and is a valid string before calling .includes()
+    const contentType = response.headers['content-type'];
+    if (typeof contentType !== 'string' || !contentType.includes('image')) {
+      throw new Error('The URL does not return an image or the content-type is missing.');
     }
 
     const writer = fs.createWriteStream(outputPath);
     response.data.pipe(writer);
 
-    // Return a promise that resolves when the image is downloaded
     return new Promise((resolve, reject) => {
       writer.on('finish', resolve);
       writer.on('error', reject);
@@ -75,6 +74,7 @@ const downloadImage = async (imageUrl, outputPath) => {
     throw error;
   }
 };
+
 
 
 // Overlay title text on image and return saved image path
