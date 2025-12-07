@@ -507,3 +507,7 @@ async function loadArticles(query = '') {
         window.handleShare = handleShare;
         window.closeArticleModal = closeArticleModal;
         window.handleSubmitComment = handleSubmitComment;
+
+        // Initialize the application
+        setupEventListeners();
+        loadArticles();
