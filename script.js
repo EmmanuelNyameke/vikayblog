@@ -290,44 +290,248 @@ async function loadArticles(query = '') {
         }
 
         // Handle Share
-        async function handleShare(articleId) {
+        // Handle Share
+async function handleShare(articleId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/articles/${articleId}/share`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        const shareUrl = data.share_url || `${API_BASE_URL}/articles/${articleId}`;
+        const articleCard = document.querySelector(`[data-id="${articleId}"]`);
+        const articleTitle = articleCard?.querySelector('.article-title')?.textContent || 'Check out this article!';
+        
+        // Create a temporary textarea to get the share text
+        const articleExcerpt = articleCard?.querySelector('.article-excerpt')?.textContent || '';
+        const shareText = `${articleTitle}\n\n${articleExcerpt.substring(0, 100)}...\n\n${shareUrl}`;
+        
+        // Check if Web Share API is available (mobile devices and modern browsers)
+        if (navigator.share) {
             try {
-                const response = await fetch(`${API_BASE_URL}/articles/${articleId}/share`, {
-                    method: 'POST'
+                await navigator.share({
+                    title: articleTitle,
+                    text: articleExcerpt.substring(0, 100) + '...',
+                    url: shareUrl
                 });
                 
-                const data = await response.json();
-                
-                // Copy share URL to clipboard
-                const shareUrl = data.share_url || `${API_BASE_URL}/articles/${articleId}`;
-                await navigator.clipboard.writeText(shareUrl);
-                
-                // Update UI
-                const articleCard = document.querySelector(`[data-id="${articleId}"]`);
-                if (articleCard) {
-                    const shareStat = articleCard.querySelector('.stat .fa-share')?.closest('.stat');
-                    if (shareStat) {
-                        const count = parseInt(shareStat.textContent) || 0;
-                        shareStat.innerHTML = `<i class="fas fa-share"></i>${count + 1}`;
-                    }
-                    
-                    const shareBtn = articleCard.querySelector('.btn-share');
-                    if (shareBtn) {
-                        const countSpan = shareBtn.querySelector('span:not(.fa-share)');
-                        if (countSpan) {
-                            const count = parseInt(countSpan.textContent.match(/\d+/)) || 0;
-                            shareBtn.innerHTML = `<i class="fas fa-share"></i> Share (${count + 1})`;
-                        }
-                    }
-                }
-                
-                showToast('Link copied to clipboard!');
-                
-            } catch (error) {
-                console.error('Error sharing article:', error);
-                showError('Failed to share article. Please try again.');
+                // Only update counts if share was successful
+                updateShareUI(articleId);
+                showToast('Shared successfully!');
+                return;
+            } catch (shareError) {
+                console.log('Web Share cancelled or failed, falling back to custom share dialog');
             }
         }
+        
+        // Fallback: Show custom share dialog for social media platforms
+        showSocialShareDialog(articleTitle, shareUrl, shareText, articleId);
+        
+    } catch (error) {
+        console.error('Error sharing article:', error);
+        showError('Failed to share article. Please try again.');
+    }
+}
+
+// Show Social Media Share Dialog
+function showSocialShareDialog(title, url, text, articleId) {
+    // Create share dialog overlay
+    const shareDialog = document.createElement('div');
+    shareDialog.className = 'share-dialog-overlay';
+    shareDialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 4000;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    // Create share dialog content
+    const shareContent = document.createElement('div');
+    shareContent.className = 'share-dialog-content';
+    shareContent.style.cssText = `
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+        animation: slideUp 0.3s ease;
+    `;
+    
+    // Create social media buttons
+    const platforms = [
+        {
+            name: 'Twitter',
+            icon: 'fab fa-twitter',
+            color: '#1DA1F2',
+            url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`
+        },
+        {
+            name: 'Facebook',
+            icon: 'fab fa-facebook',
+            color: '#4267B2',
+            url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`
+        },
+        {
+            name: 'LinkedIn',
+            icon: 'fab fa-linkedin',
+            color: '#0077B5',
+            url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
+        },
+        {
+            name: 'WhatsApp',
+            icon: 'fab fa-whatsapp',
+            color: '#25D366',
+            url: `https://wa.me/?text=${encodeURIComponent(text)}`
+        },
+        {
+            name: 'Telegram',
+            icon: 'fab fa-telegram',
+            color: '#0088CC',
+            url: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+        },
+        {
+            name: 'Email',
+            icon: 'fas fa-envelope',
+            color: '#EA4335',
+            url: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(text)}`
+        }
+    ];
+    
+    // Build dialog HTML
+    shareContent.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: #212121;">Share Article</h3>
+            <button class="close-share-dialog" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #757575;">&times;</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;" id="shareButtonsContainer">
+            <!-- Social buttons will be added here -->
+        </div>
+        <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="margin: 0 0 10px 0; font-weight: 500; color: #212121;">Share Link:</p>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="shareUrlInput" value="${url}" readonly style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                <button id="copyShareLink" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500;">Copy</button>
+            </div>
+        </div>
+    `;
+    
+    // Add social buttons
+    const buttonsContainer = shareContent.querySelector('#shareButtonsContainer');
+    platforms.forEach(platform => {
+        const button = document.createElement('button');
+        button.className = 'social-share-btn';
+        button.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        `;
+        
+        button.innerHTML = `
+            <i class="${platform.icon}" style="font-size: 24px; margin-bottom: 8px; color: ${platform.color};"></i>
+            <span style="font-size: 12px; color: #212121;">${platform.name}</span>
+        `;
+        
+        button.onclick = () => {
+            window.open(platform.url, '_blank', 'width=600,height=400');
+            updateShareUI(articleId);
+            shareDialog.remove();
+            showToast(`Shared on ${platform.name}!`);
+        };
+        
+        button.onmouseover = () => {
+            button.style.transform = 'translateY(-2px)';
+            button.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            button.style.backgroundColor = '#f9f9f9';
+        };
+        
+        button.onmouseout = () => {
+            button.style.transform = 'translateY(0)';
+            button.style.boxShadow = 'none';
+            button.style.backgroundColor = 'white';
+        };
+        
+        buttonsContainer.appendChild(button);
+    });
+    
+    // Assemble dialog
+    shareDialog.appendChild(shareContent);
+    document.body.appendChild(shareDialog);
+    
+    // Add close functionality
+    const closeBtn = shareContent.querySelector('.close-share-dialog');
+    closeBtn.onclick = () => shareDialog.remove();
+    
+    // Close on overlay click
+    shareDialog.onclick = (e) => {
+        if (e.target === shareDialog) shareDialog.remove();
+    };
+    
+    // Copy link functionality
+    const copyBtn = shareContent.querySelector('#copyShareLink');
+    const urlInput = shareContent.querySelector('#shareUrlInput');
+    
+    copyBtn.onclick = async () => {
+        try {
+            await navigator.clipboard.writeText(url);
+            copyBtn.textContent = 'Copied!';
+            copyBtn.style.background = '#388E3C';
+            showToast('Link copied to clipboard!');
+            updateShareUI(articleId);
+            
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+                copyBtn.style.background = '#4CAF50';
+            }, 2000);
+        } catch (err) {
+            // Fallback for older browsers
+            urlInput.select();
+            document.execCommand('copy');
+            copyBtn.textContent = 'Copied!';
+            copyBtn.style.background = '#388E3C';
+            showToast('Link copied to clipboard!');
+            updateShareUI(articleId);
+            
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+                copyBtn.style.background = '#4CAF50';
+            }, 2000);
+        }
+    };
+}
+
+// Update Share UI (separated to reuse)
+function updateShareUI(articleId) {
+    const articleCard = document.querySelector(`[data-id="${articleId}"]`);
+    if (articleCard) {
+        const shareStat = articleCard.querySelector('.stat .fa-share')?.closest('.stat');
+        if (shareStat) {
+            const count = parseInt(shareStat.textContent) || 0;
+            shareStat.innerHTML = `<i class="fas fa-share"></i>${count + 1}`;
+        }
+        
+        const shareBtn = articleCard.querySelector('.btn-share');
+        if (shareBtn) {
+            const countSpan = shareBtn.querySelector('span:not(.fa-share)');
+            if (countSpan) {
+                const count = parseInt(countSpan.textContent.match(/\d+/)) || 0;
+                shareBtn.innerHTML = `<i class="fas fa-share"></i> Share (${count + 1})`;
+            }
+        }
+    }
+}
 
         // Handle Submit Comment
         async function handleSubmitComment() {
