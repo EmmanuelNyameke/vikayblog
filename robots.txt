@@ -1,4 +1,0 @@
-User-agent: *
-Disallow:
-
-Sitemap: https://vikayblog.onrender.com/sitemap.xml
