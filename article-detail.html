@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ViKayBlog | News Articles</title>
+    <title>ViKayBlog | Read</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="article-detail.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" href="vikayblog_app_icon.png" type="image/png">
@@ -14,59 +15,43 @@
     <header class="header">
         <div class="container">
             <div class="logo">
-                <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
                     <img src="vikayblog_app_icon.png" alt="News Logo" class="logo-img" onerror="this.style.display='none'">
                     <div>
                         <h1>ViKayBlog</h1>
                         <p class="tagline">Stay updated with the latest news</p>
                     </div>
-                </div>
+                </a>
             </div>
-            <div class="search-container">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Search articles...">
-                    <button id="searchBtn">Search</button>
-                </div>
-            </div>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Articles
+            </a>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="container">
-        <!-- Page Title -->
-        <div class="page-header">
-            <h2><i class="fas fa-list"></i> Latest Articles</h2>
-            <div class="stats">
-                <span id="totalArticles">Loading...</span> articles
-            </div>
-        </div>
-
         <!-- Loading State -->
         <div id="loading" class="loading">
             <div class="loading-spinner">
                 <img src="vikayblog_app_icon.png" alt="Loading...">
             </div>
-            <p>Loading articles...</p>
+            <p>Loading article...</p>
         </div>
 
-        <!-- Articles Grid -->
-        <div id="articlesGrid" class="articles-grid" style="display: none;">
-            <!-- Articles will be dynamically inserted here -->
+        <!-- Article Content -->
+        <div id="articleContent" style="display: none;">
+            <!-- Article will be dynamically inserted here -->
         </div>
 
-        <!-- Empty State -->
-        <div id="emptyState" class="empty-state" style="display: none;">
-            <img src="vikayblog_app_icon.png" alt="No articles" style="width: 80px; height: 80px; margin-bottom: 20px;" onerror="this.style.display='none'">
-            <h3>No articles found</h3>
-            <p>Try adjusting your search or check back later for new articles.</p>
-        </div>
-
-        <!-- Load More Button -->
-        <div id="loadMoreContainer" class="load-more-container" style="display: none;">
-            <button id="loadMoreBtn" class="btn-load-more">
-                <i class="fas fa-sync-alt"></i> Load More Articles
-            </button>
+        <!-- Error State -->
+        <div id="errorState" class="error-state" style="display: none;">
+            <img src="https://img.icons8.com/color/96/000000/error.png" alt="Error" style="width: 80px; height: 80px; margin-bottom: 20px;" onerror="this.style.display='none'">
+            <h3>Article Not Found</h3>
+            <p>The article you're looking for doesn't exist or has been removed.</p>
+            <a href="index.html" class="btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Articles
+            </a>
         </div>
     </main>
 
@@ -94,6 +79,6 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
-    <script src="script.js"></script>
+    <script src="article-detail.js"></script>
 </body>
 </html>
