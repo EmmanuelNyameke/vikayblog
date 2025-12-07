@@ -5,11 +5,14 @@ let likedArticles = JSON.parse(localStorage.getItem('likedArticles') || '[]');
 // DOM Elements
 const articlesGrid = document.getElementById('articlesGrid');
 const loadingContainer = document.getElementById('loadingContainer');
-const articleModal = document.getElementById('articleModal');
-const closeModal = document.getElementById('closeModal');
 const searchInput = document.getElementById('searchInput');
 const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toastMessage');
+
+// View elements
+const articlesListView = document.getElementById('articlesListView');
+const articleDetailView = document.getElementById('articleDetailView');
+const backButton = document.getElementById('backButton');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,22 +26,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const img2 = new Image();
         img2.src = loadingLogo.src;
     }
+    
+    // Check if we're on an article detail page from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const articleId = urlParams.get('article');
+    if (articleId) {
+        openArticleDetailPage(articleId);
+    } else {
+        setupEventListeners();
+        loadArticles();
+    }
 });
 
 // Event listeners
 function setupEventListeners() {
-    closeModal.addEventListener('click', closeArticleModal);
-    articleModal.addEventListener('click', (e) => {
-        if (e.target === articleModal) closeArticleModal();
-    });
-
     searchInput.addEventListener('input', debounce(handleSearch, 300));
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeArticleModal();
+    
+    // Back button
+    backButton.addEventListener('click', () => {
+        // Update URL without page reload
+        window.history.pushState({}, '', 'index.html');
+        showArticleListView();
     });
     
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const articleId = urlParams.get('article');
+        
+        if (articleId) {
+            openArticleDetailPage(articleId);
+        } else {
+            showArticleListView();
+        }
+    });
 }
 
 // Load Articles
@@ -60,234 +81,350 @@ async function loadArticles(query = '') {
 }
 
 // Render Articles
-        function renderArticles(articles) {
-            if (!articles || articles.length === 0) {
-                articlesGrid.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0;">
-                        <i class="fas fa-newspaper" style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
-                        <h3 style="color: #666; margin-bottom: 10px;">No articles found</h3>
-                        <p style="color: #999;">Try a different search or check back later for new articles.</p>
-                    </div>
-                `;
-                return;
-            }
+function renderArticles(articles) {
+    if (!articles || articles.length === 0) {
+        articlesGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0;">
+                <i class="fas fa-newspaper" style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
+                <h3 style="color: #666; margin-bottom: 10px;">No articles found</h3>
+                <p style="color: #999;">Try a different search or check back later for new articles.</p>
+            </div>
+        `;
+        return;
+    }
 
-            articlesGrid.innerHTML = articles.map(article => `
-                <div class="article-card" data-id="${article.id}">
-                    <img src="${article.thumbnail_url || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=400&h=200&fit=crop'}" 
-                         alt="${article.title}" 
-                         class="article-image"
-                         onerror="this.src='https://images.unsplash.com/photo-1495020689067-958852a7765e?w=400&h=200&fit=crop'">
-                    
-                    <div class="article-content">
-                        <span class="article-category">${article.tags && article.tags.length > 0 ? article.tags[0] : 'General'}</span>
-                        <h3 class="article-title" onclick="openArticleModal('${article.id}')">
-                            ${article.title}
-                        </h3>
-                        <p class="article-excerpt">
-                            ${article.content.substring(0, 150)}${article.content.length > 150 ? '...' : ''}
-                        </p>
-                        
-                        <div class="article-meta">
-                            <span class="article-date">
-                                <i class="far fa-calendar"></i>
-                                ${formatDate(article.created_at)}
-                            </span>
-                            <div class="article-stats">
-                                <span class="stat ${likedArticles.includes(article.id) ? 'liked' : ''}" 
-                                      onclick="handleLike('${article.id}', this)">
-                                    <i class="${likedArticles.includes(article.id) ? 'fas' : 'far'} fa-heart"></i>
-                                    ${article.likes_count || 0}
-                                </span>
-                                <span class="stat" onclick="openArticleModal('${article.id}')">
-                                    <i class="far fa-comment"></i>
-                                    ${article.comments_count || 0}
-                                </span>
-                                <span class="stat" onclick="handleShare('${article.id}')">
-                                    <i class="fas fa-share"></i>
-                                    ${article.shares_count || 0}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn btn-like ${likedArticles.includes(article.id) ? 'liked' : ''}" 
-                                onclick="handleLike('${article.id}', this)">
+    articlesGrid.innerHTML = articles.map(article => `
+        <div class="article-card" data-id="${article.id}">
+            <img src="${article.thumbnail_url || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=400&h=200&fit=crop'}" 
+                 alt="${article.title}" 
+                 class="article-image"
+                 onerror="this.src='https://images.unsplash.com/photo-1495020689067-958852a7765e?w=400&h=200&fit=crop'">
+            
+            <div class="article-content">
+                <span class="article-category">${article.tags && article.tags.length > 0 ? article.tags[0] : 'General'}</span>
+                <h3 class="article-title" onclick="openArticleDetailPage('${article.id}')">
+                    ${article.title}
+                </h3>
+                <p class="article-excerpt">
+                    ${article.content.substring(0, 150)}${article.content.length > 150 ? '...' : ''}
+                </p>
+                
+                <div class="article-meta">
+                    <span class="article-date">
+                        <i class="far fa-calendar"></i>
+                        ${formatDate(article.created_at)}
+                    </span>
+                    <div class="article-stats">
+                        <span class="stat ${likedArticles.includes(article.id) ? 'liked' : ''}" 
+                              onclick="handleLike('${article.id}', this)">
                             <i class="${likedArticles.includes(article.id) ? 'fas' : 'far'} fa-heart"></i>
-                            ${likedArticles.includes(article.id) ? 'Liked' : 'Like'} (${article.likes_count || 0})
-                        </button>
-                        <button class="btn btn-comment" onclick="openArticleModal('${article.id}')">
+                            ${article.likes_count || 0}
+                        </span>
+                        <span class="stat" onclick="openArticleDetailPage('${article.id}')">
                             <i class="far fa-comment"></i>
-                            Comment (${article.comments_count || 0})
-                        </button>
-                        <button class="btn btn-share" onclick="handleShare('${article.id}')">
+                            ${article.comments_count || 0}
+                        </span>
+                        <span class="stat" onclick="handleShare('${article.id}')">
                             <i class="fas fa-share"></i>
-                            Share (${article.shares_count || 0})
-                        </button>
+                            ${article.shares_count || 0}
+                        </span>
                     </div>
                 </div>
-            `).join('');
-        }
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-like ${likedArticles.includes(article.id) ? 'liked' : ''}" 
+                        onclick="handleLike('${article.id}', this)">
+                    <i class="${likedArticles.includes(article.id) ? 'fas' : 'far'} fa-heart"></i>
+                    ${likedArticles.includes(article.id) ? 'Liked' : 'Like'} (${article.likes_count || 0})
+                </button>
+                <button class="btn btn-comment" onclick="openArticleDetailPage('${article.id}')">
+                    <i class="far fa-comment"></i>
+                    Comment (${article.comments_count || 0})
+                </button>
+                <button class="btn btn-share" onclick="handleShare('${article.id}')">
+                    <i class="fas fa-share"></i>
+                    Share (${article.shares_count || 0})
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
 
-        // Open Article Modal
-        async function openArticleModal(articleId) {
-            try {
-                showLoading(true);
-                currentArticleId = articleId;
-                
-                // Load article details
-                const articleResponse = await fetch(`${API_BASE_URL}/articles/${articleId}`);
-                const article = await articleResponse.json();
-                
-                // Load comments
-                const commentsResponse = await fetch(`${API_BASE_URL}/articles/${articleId}/comments`);
-                const comments = await commentsResponse.json();
-                
-                // Populate modal
-                document.getElementById('modalTitle').textContent = article.title;
-                document.getElementById('modalDate').innerHTML = `<i class="far fa-calendar"></i> ${formatDate(article.created_at)}`;
-                document.getElementById('modalAuthor').innerHTML = `<i class="far fa-user"></i> ${article.author_id || 'Anonymous'}`;
-                document.getElementById('modalImage').src = article.thumbnail_url || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=400&fit=crop';
-                document.getElementById('modalImage').onerror = function() {
-                    this.src = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=400&fit=crop';
-                };
-                document.getElementById('modalContent').innerHTML = article.content.split('\n').map(p => `<p>${p}</p>`).join('');
-                document.getElementById('modalLikeCount').textContent = article.likes_count || 0;
-                document.getElementById('commentsCount').textContent = article.comments_count || 0;
-                
-                // Update modal like button
-                const modalLikeBtn = document.getElementById('modalLikeBtn');
-                modalLikeBtn.className = `btn btn-like ${likedArticles.includes(articleId) ? 'liked' : ''}`;
-                modalLikeBtn.innerHTML = `<i class="${likedArticles.includes(articleId) ? 'fas' : 'far'} fa-heart"></i>
-                                          <span id="modalLikeCount">${article.likes_count || 0}</span>`;
-                
-                // Set up modal button handlers
-                modalLikeBtn.onclick = () => handleLike(articleId, modalLikeBtn);
-                document.getElementById('modalShareBtn').onclick = () => handleShare(articleId);
-                document.getElementById('modalCommentBtn').onclick = () => {
-                    document.getElementById('commentInput').focus();
-                };
-                
-                // Render tags
-                const tagsContainer = document.getElementById('modalTags');
-                tagsContainer.innerHTML = '';
-                if (article.tags && article.tags.length > 0) {
-                    article.tags.forEach(tag => {
-                        const tagEl = document.createElement('span');
-                        tagEl.className = 'tag';
-                        tagEl.textContent = tag;
-                        tagsContainer.appendChild(tagEl);
-                    });
-                }
-                
-                // Render comments
-                renderComments(comments);
-                
-                // Set up comment submission
-                document.getElementById('submitComment').onclick = handleSubmitComment;
-                document.getElementById('commentInput').onkeydown = (e) => {
-                    if (e.ctrlKey && e.key === 'Enter') {
-                        handleSubmitComment();
-                    }
-                };
-                
-                // Show modal
-                articleModal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-                showLoading(false);
-                
-            } catch (error) {
-                console.error('Error loading article:', error);
-                showError('Failed to load article. Please try again.');
-                showLoading(false);
+// Open Article Detail Page
+async function openArticleDetailPage(articleId) {
+    try {
+        showLoading(true);
+        currentArticleId = articleId;
+        
+        // Update URL without reloading page
+        window.history.pushState({}, '', `?article=${articleId}`);
+        
+        // Load article details
+        const articleResponse = await fetch(`${API_BASE_URL}/articles/${articleId}`);
+        const article = await articleResponse.json();
+        
+        // Load comments
+        const commentsResponse = await fetch(`${API_BASE_URL}/articles/${articleId}/comments`);
+        const comments = await commentsResponse.json();
+        
+        // Populate detail page
+        document.getElementById('detailTitle').textContent = article.title;
+        document.getElementById('detailDate').innerHTML = `<i class="far fa-calendar"></i> ${formatDate(article.created_at)}`;
+        document.getElementById('detailAuthor').innerHTML = `<i class="far fa-user"></i> ${article.author_id || 'Anonymous'}`;
+        document.getElementById('detailImage').src = article.thumbnail_url || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=400&fit=crop';
+        document.getElementById('detailImage').onerror = function() {
+            this.src = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=400&fit=crop';
+        };
+        
+        // Format content with paragraphs
+        document.getElementById('detailContent').innerHTML = article.content.split('\n').map(p => `<p>${p}</p>`).join('');
+        
+        // Update counts
+        document.getElementById('detailLikeCount').textContent = article.likes_count || 0;
+        document.getElementById('detailCommentCount').textContent = article.comments_count || 0;
+        document.getElementById('detailCommentsCount').textContent = article.comments_count || 0;
+        
+        // Update like button
+        const detailLikeBtn = document.getElementById('detailLikeBtn');
+        detailLikeBtn.className = `btn btn-like ${likedArticles.includes(articleId) ? 'liked' : ''}`;
+        detailLikeBtn.innerHTML = `<i class="${likedArticles.includes(articleId) ? 'fas' : 'far'} fa-heart"></i>
+                                  <span id="detailLikeCount">${article.likes_count || 0}</span>`;
+        
+        // Set up button handlers
+        detailLikeBtn.onclick = () => handleLike(articleId, detailLikeBtn);
+        document.getElementById('detailShareBtn').onclick = () => handleShare(articleId);
+        document.getElementById('detailCommentBtn').onclick = () => {
+            document.getElementById('detailCommentInput').focus();
+        };
+        
+        // Render tags
+        const tagsContainer = document.getElementById('detailTags');
+        tagsContainer.innerHTML = '';
+        if (article.tags && article.tags.length > 0) {
+            article.tags.forEach(tag => {
+                const tagEl = document.createElement('span');
+                tagEl.className = 'tag';
+                tagEl.textContent = tag;
+                tagsContainer.appendChild(tagEl);
+            });
+        }
+        
+        // Render comments
+        renderDetailComments(comments);
+        
+        // Set up comment submission
+        document.getElementById('detailSubmitComment').onclick = handleDetailSubmitComment;
+        document.getElementById('detailCommentInput').onkeydown = (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                handleDetailSubmitComment();
             }
-        }
+        };
+        
+        // Show detail view
+        showArticleDetailView();
+        showLoading(false);
+        
+        // Update page title
+        document.title = `${article.title} | VikayBlog`;
+        
+    } catch (error) {
+        console.error('Error loading article:', error);
+        showError('Failed to load article. Please try again.');
+        showLoading(false);
+        showArticleListView();
+    }
+}
 
-        // Close Article Modal
-        function closeArticleModal() {
-            articleModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            currentArticleId = null;
-        }
+// Show Article Detail View
+function showArticleDetailView() {
+    articlesListView.style.display = 'none';
+    articleDetailView.style.display = 'block';
+    document.getElementById('searchInput').style.display = 'none';
+}
 
-        // Handle Like
-        async function handleLike(articleId, element) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/articles/${articleId}/like`, {
-                    method: 'POST'
-                });
-                
-                const data = await response.json();
-                
-                // Update UI
-                const isLiked = likedArticles.includes(articleId);
-                if (isLiked) {
-                    // Unlike
-                    likedArticles = likedArticles.filter(id => id !== articleId);
-                    updateLikeUI(element, false);
-                } else {
-                    // Like
-                    likedArticles.push(articleId);
-                    updateLikeUI(element, true);
-                }
-                
-                // Save to localStorage
-                localStorage.setItem('likedArticles', JSON.stringify(likedArticles));
-                
-                showToast(isLiked ? 'Article unliked' : 'Article liked!');
-                
-            } catch (error) {
-                console.error('Error liking article:', error);
-                showError('Failed to like article. Please try again.');
-            }
-        }
+// Show Article List View
+function showArticleListView() {
+    articlesListView.style.display = 'block';
+    articleDetailView.style.display = 'none';
+    document.getElementById('searchInput').style.display = 'block';
+    document.title = 'VikayBlog | News Articles';
+    currentArticleId = null;
+}
 
-        // Update Like UI
-        function updateLikeUI(element, isLiked) {
-            // Update button text and icon
-            if (element.classList.contains('btn-like')) {
-                element.classList.toggle('liked', isLiked);
-                const icon = element.querySelector('i');
-                icon.className = isLiked ? 'fas fa-heart' : 'far fa-heart';
-                
-                // Update count
-                const countSpan = element.querySelector('span:not(.fa-heart)');
-                if (countSpan) {
-                    let count = parseInt(countSpan.textContent) || 0;
-                    count = isLiked ? count + 1 : Math.max(0, count - 1);
-                    countSpan.textContent = count;
-                }
+// Handle Detail Submit Comment
+async function handleDetailSubmitComment() {
+    const commentInput = document.getElementById('detailCommentInput');
+    const commentText = commentInput.value.trim();
+    
+    if (!commentText) {
+        showError('Please enter a comment');
+        return;
+    }
+    
+    if (!currentArticleId) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/articles/${currentArticleId}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: commentText
+            })
+        });
+        
+        if (!response.ok) throw new Error('Failed to post comment');
+        
+        const comment = await response.json();
+        
+        // Add comment to list
+        const commentsList = document.getElementById('detailCommentsList');
+        const commentElement = createCommentElement(comment);
+        commentsList.insertBefore(commentElement, commentsList.firstChild);
+        
+        // Update comment count
+        const commentsCount = document.getElementById('detailCommentsCount');
+        let count = parseInt(commentsCount.textContent) || 0;
+        commentsCount.textContent = count + 1;
+        
+        // Update comment button count
+        const detailCommentCount = document.getElementById('detailCommentCount');
+        detailCommentCount.textContent = count + 1;
+        
+        // Clear input
+        commentInput.value = '';
+        
+        // Update article card comment count (if still in DOM)
+        const articleCard = document.querySelector(`[data-id="${currentArticleId}"]`);
+        if (articleCard) {
+            const commentStat = articleCard.querySelector('.stat .fa-comment')?.closest('.stat');
+            if (commentStat) {
+                const currentCount = parseInt(commentStat.textContent) || 0;
+                commentStat.innerHTML = `<i class="far fa-comment"></i>${currentCount + 1}`;
             }
             
-            // Update stats in article card
-            const stat = element.closest('.article-card')?.querySelector('.stat .fa-heart')?.closest('.stat');
-            if (stat) {
-                stat.classList.toggle('liked', isLiked);
-                const icon = stat.querySelector('i');
-                icon.className = isLiked ? 'fas fa-heart' : 'far fa-heart';
-                
-                // Update count
-                const count = parseInt(stat.textContent) || 0;
-                stat.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
-                                 ${isLiked ? count + 1 : Math.max(0, count - 1)}`;
-            }
-            
-            // Update modal if open
-            if (currentArticleId) {
-                const modalLikeBtn = document.getElementById('modalLikeBtn');
-                const modalCount = document.getElementById('modalLikeCount');
-                if (modalLikeBtn && modalCount) {
-                    modalLikeBtn.classList.toggle('liked', isLiked);
-                    const modalIcon = modalLikeBtn.querySelector('i');
-                    modalIcon.className = isLiked ? 'fas fa-heart' : 'far fa-heart';
-                    
-                    let modalCountNum = parseInt(modalCount.textContent) || 0;
-                    modalCountNum = isLiked ? modalCountNum + 1 : Math.max(0, modalCountNum - 1);
-                    modalCount.textContent = modalCountNum;
-                }
+            const commentBtn = articleCard.querySelector('.btn-comment');
+            if (commentBtn) {
+                const countMatch = commentBtn.textContent.match(/\((\d+)\)/);
+                const currentCount = countMatch ? parseInt(countMatch[1]) : 0;
+                commentBtn.innerHTML = `<i class="far fa-comment"></i> Comment (${currentCount + 1})`;
             }
         }
+        
+        showToast('Comment posted successfully!');
+        
+    } catch (error) {
+        console.error('Error posting comment:', error);
+        showError('Failed to post comment. Please try again.');
+    }
+}
+
+// Render Detail Comments
+function renderDetailComments(comments) {
+    const commentsList = document.getElementById('detailCommentsList');
+    if (!comments || comments.length === 0) {
+        commentsList.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #666;">
+                <i class="far fa-comment" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+                <p>No comments yet. Be the first to comment!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    commentsList.innerHTML = comments.map(comment => `
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-user">
+                    <i class="far fa-user"></i>
+                    ${comment.user_id || 'Anonymous'}
+                </span>
+                <span class="comment-date">${formatDate(comment.created_at)}</span>
+            </div>
+            <p class="comment-text">${comment.text}</p>
+        </div>
+    `).join('');
+}
+
+// Handle Like
+async function handleLike(articleId, element) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/articles/${articleId}/like`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        // Update UI
+        const isLiked = likedArticles.includes(articleId);
+        if (isLiked) {
+            // Unlike
+            likedArticles = likedArticles.filter(id => id !== articleId);
+            updateLikeUI(element, false);
+        } else {
+            // Like
+            likedArticles.push(articleId);
+            updateLikeUI(element, true);
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('likedArticles', JSON.stringify(likedArticles));
+        
+        showToast(isLiked ? 'Article unliked' : 'Article liked!');
+        
+    } catch (error) {
+        console.error('Error liking article:', error);
+        showError('Failed to like article. Please try again.');
+    }
+}
+
+// Update Like UI
+function updateLikeUI(element, isLiked) {
+    // Update button text and icon
+    if (element.classList.contains('btn-like')) {
+        element.classList.toggle('liked', isLiked);
+        const icon = element.querySelector('i');
+        icon.className = isLiked ? 'fas fa-heart' : 'far fa-heart';
+        
+        // Update count
+        const countSpan = element.querySelector('span:not(.fa-heart)');
+        if (countSpan) {
+            let count = parseInt(countSpan.textContent) || 0;
+            count = isLiked ? count + 1 : Math.max(0, count - 1);
+            countSpan.textContent = count;
+        }
+    }
+    
+    // Update stats in article card
+    const stat = element.closest('.article-card')?.querySelector('.stat .fa-heart')?.closest('.stat');
+    if (stat) {
+        stat.classList.toggle('liked', isLiked);
+        const icon = stat.querySelector('i');
+        icon.className = isLiked ? 'fas fa-heart' : 'far fa-heart';
+        
+        // Update count
+        const count = parseInt(stat.textContent) || 0;
+        stat.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                         ${isLiked ? count + 1 : Math.max(0, count - 1)}`;
+    }
+    
+    // Update detail page if open
+    if (currentArticleId) {
+        const detailLikeBtn = document.getElementById('detailLikeBtn');
+        const detailLikeCount = document.getElementById('detailLikeCount');
+        if (detailLikeBtn && detailLikeCount) {
+            detailLikeBtn.classList.toggle('liked', isLiked);
+            const modalIcon = detailLikeBtn.querySelector('i');
+            modalIcon.className = isLiked ? 'fas fa-heart' : 'far fa-heart';
+            
+            let modalCountNum = parseInt(detailLikeCount.textContent) || 0;
+            modalCountNum = isLiked ? modalCountNum + 1 : Math.max(0, modalCountNum - 1);
+            detailLikeCount.textContent = modalCountNum;
+        }
+    }
+}
 
         // Handle Share
 async function handleShare(articleId) {
@@ -682,90 +819,91 @@ function updateShareUI(articleId) {
         }
 
         // Create Comment Element
-        function createCommentElement(comment) {
-            const div = document.createElement('div');
-            div.className = 'comment-item';
-            div.innerHTML = `
-                <div class="comment-header">
-                    <span class="comment-user">
-                        <i class="far fa-user"></i>
-                        ${comment.user_id || 'Anonymous'}
-                    </span>
-                    <span class="comment-date">${formatDate(comment.created_at)}</span>
-                </div>
-                <p class="comment-text">${comment.text}</p>
-            `;
-            return div;
-        }
+function createCommentElement(comment) {
+    const div = document.createElement('div');
+    div.className = 'comment-item';
+    div.innerHTML = `
+        <div class="comment-header">
+            <span class="comment-user">
+                <i class="far fa-user"></i>
+                ${comment.user_id || 'Anonymous'}
+            </span>
+            <span class="comment-date">${formatDate(comment.created_at)}</span>
+        </div>
+        <p class="comment-text">${comment.text}</p>
+    `;
+    return div;
+}
 
-        // Handle Search
-        function handleSearch() {
-            const query = searchInput.value.trim();
-            loadArticles(query);
-        }
+// Handle Search
+function handleSearch() {
+    const query = searchInput.value.trim();
+    loadArticles(query);
+}
 
-        // Show/Hide Loading
-        function showLoading(show) {
-            loadingContainer.style.display = show ? 'block' : 'none';
-            articlesGrid.style.display = show ? 'none' : 'grid';
-        }
+// Show/Hide Loading
+function showLoading(show) {
+    loadingContainer.style.display = show ? 'block' : 'none';
+    articlesGrid.style.display = show ? 'none' : 'grid';
+}
 
-        // Show Toast
-        function showToast(message) {
-            toastMessage.textContent = message;
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
+// Show Toast
+function showToast(message) {
+    toastMessage.textContent = message;
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
 
-        // Show Error
-        function showError(message) {
-            toastMessage.textContent = message;
-            toast.style.backgroundColor = '#D32F2F';
-            toast.querySelector('i').className = 'fas fa-exclamation-circle';
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.style.backgroundColor = '';
-                toast.querySelector('i').className = 'fas fa-check-circle';
-            }, 3000);
-        }
+// Show Error
+function showError(message) {
+    toastMessage.textContent = message;
+    toast.style.backgroundColor = '#D32F2F';
+    toast.querySelector('i').className = 'fas fa-exclamation-circle';
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.style.backgroundColor = '';
+        toast.querySelector('i').className = 'fas fa-check-circle';
+    }, 3000);
+}
 
-        // Format Date
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
+// Format Date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
 
-        // Debounce Function
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
+// Debounce Function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
-        // Make functions available globally
-        window.openArticleModal = openArticleModal;
-        window.handleLike = handleLike;
-        window.handleShare = handleShare;
-        window.closeArticleModal = closeArticleModal;
-        window.handleSubmitComment = handleSubmitComment;
+// Make functions available globally
+window.openArticleDetailPage = openArticleDetailPage;
+window.handleLike = handleLike;
+window.handleShare = handleShare;
+window.handleDetailSubmitComment = handleDetailSubmitComment;
 
-        // Initialize the application
-        setupEventListeners();
-        loadArticles();
+// Initialize the application
+if (!window.location.search.includes('article=')) {
+    setupEventListeners();
+    loadArticles();
+}

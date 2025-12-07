@@ -4,20 +4,6 @@
         <title>VikayBlog | News Articles</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- Open Graph meta tags for social sharing -->
-        <meta property="og:type" content="website">
-        <meta property="og:site_name" content="VikayBlog">
-        <meta property="og:title" content="VikayBlog | Latest News Articles">
-        <meta property="og:description" content="Stay updated with the latest news articles on VikayBlog">
-        <meta property="og:image" content="https://vikayblog.com/vikayblog_app_icon.png">
-        <meta property="og:url" content="https://vikayblog.com">
-
-        <!-- Twitter Card meta tags -->
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="@vikayblog">
-        <meta name="twitter:title" content="VikayBlog | Latest News Articles">
-        <meta name="twitter:description" content="Stay updated with the latest news articles on VikayBlog">
-        <meta name="twitter:image" content="https://vikayblog.com/vikayblog_app_icon.png">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <link href="styles.css" rel="stylesheet">
@@ -29,7 +15,7 @@
          <header>
          <div class="container">
             <nav class="navbar">
-                <a href="#" class="logo">
+                <a href="index.html" class="logo">
                     <img src="vikayblog_app_icon.png" alt="Icon" class="logo-image">
                     <div class="logo-text">Vikay<span>Blog</span></div>
                 </a>
@@ -45,61 +31,72 @@
          <!-- Main Content -->
           <main class="main-content">
             <div class="container">
-                <h1 class="page-title">Latest Articles</h1>
+                <!-- Article List View -->
+                <div id="articlesListView">
+                    <h1 class="page-title">Latest Articles</h1>
 
-                <!-- Loading state with Logo -->
-                 <div class="loading-container" id="loadingContainer">
-                    <img src="vikayblog_app_icon.png" alt="Loading..." class="logo-loading">
-                    <p class="loading-text">Loading news...</p>
-                 </div>
+                    <!-- Loading state with Logo -->
+                     <div class="loading-container" id="loadingContainer">
+                        <img src="vikayblog_app_icon.png" alt="Loading..." class="logo-loading">
+                        <p class="loading-text">Loading news...</p>
+                     </div>
 
-                 <!-- Articles Grid -->
-                  <div class="articles-grid" id="articlesGrid"></div>
+                     <!-- Articles Grid -->
+                      <div class="articles-grid" id="articlesGrid"></div>
+                </div>
 
-                  <!-- Articles Detail Modal -->
-                   <div class="modal-overlay" id="articleModal">
-                    <div class="modal-content">
-                        <button class="modal-close" id="closeModal">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <div class="modal-header">
-                            <h2 class="modal-title" id="modalTitle"></h2>
-                            <div class="modal-meta">
-                                <span class="modal-date" id="modalDate"></span>
-                                <span class="modal-author" id="modalAuthor"></span>
+                <!-- Article Detail View (Hidden by default) -->
+                <div id="articleDetailView" style="display: none;">
+                    <button id="backButton" class="back-button" style="margin-bottom: 20px; background: none; border: none; color: #4CAF50; font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-arrow-left"></i> Back to Articles
+                    </button>
+                    
+                    <article class="article-detail">
+                        <header class="article-detail-header">
+                            <h1 class="article-detail-title" id="detailTitle"></h1>
+                            <div class="article-detail-meta">
+                                <span class="article-detail-date" id="detailDate"></span>
+                                <span class="article-detail-author" id="detailAuthor"></span>
+                                <span class="article-detail-views">
+                                    <i class="far fa-eye"></i>
+                                    <span id="detailViews">0</span> views
+                                </span>
                             </div>
+                            <div class="article-detail-tags" id="detailTags"></div>
+                        </header>
+                        
+                        <div class="article-detail-image-container">
+                            <img class="article-detail-image" id="detailImage" src="" alt="">
                         </div>
-                        <div class="modal-body">
-                            <img class="modal-image" id="modalImage" src="" alt="">
-                            <div class="modal-text" id="modalContent"></div>
-                            <div class="modal-tags" id="modalTags"></div>
-
-                            <!-- Comments Section -->
-                             <div class="comments-section">
-                                <h3 class="comments-title">Comments (<span id="commentsCount">0</span>)</h3>
-                                <div class="comment-form">
-                                    <textarea class="comment-input" id="commentInput" placeholder="Write your comment..."></textarea>
-                                    <button class="comment-submit" id="submitComment">Post Comment</button>
-                                </div>
-                                <div class="comments-list" id="commentsList"></div>
-                             </div>
-                        </div>
-                        <div class="modal-actions">
-                            <button class="btn btn-like" id="modalLikeBtn">
+                        
+                        <div class="article-detail-content" id="detailContent"></div>
+                        
+                        <div class="article-detail-actions">
+                            <button class="btn btn-like" id="detailLikeBtn">
                                 <i class="far fa-heart"></i>
-                                <span id="modalLikeCount">0</span>
+                                <span id="detailLikeCount">0</span>
                             </button>
-                            <button class="btn btn-comment" id="modalCommentBtn">
+                            <button class="btn btn-comment" id="detailCommentBtn">
                                 <i class="far fa-comment"></i>
-                                Comment
+                                <span id="detailCommentCount">0</span>
                             </button>
-                            <button class="btn btn-share" id="modalShareBtn">
+                            <button class="btn btn-share" id="detailShareBtn">
                                 <i class="fas fa-share"></i>
                                 Share
                             </button>
                         </div>
-                    </div>
-                   </div>
+                        
+                        <!-- Comments Section -->
+                        <div class="comments-section">
+                            <h3 class="comments-title">Comments (<span id="detailCommentsCount">0</span>)</h3>
+                            <div class="comment-form">
+                                <textarea class="comment-input" id="detailCommentInput" placeholder="Write your comment..."></textarea>
+                                <button class="comment-submit" id="detailSubmitComment">Post Comment</button>
+                            </div>
+                            <div class="comments-list" id="detailCommentsList"></div>
+                        </div>
+                    </article>
+                </div>
             </div>
           </main>
 
