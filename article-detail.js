@@ -181,7 +181,7 @@ async function shareArticle() {
         }
         
         const data = await response.json();
-        const shareUrl = data.share_url || window.location.href; // Use current page URL
+        const shareUrl = data.share_url || window.location.href;
         
         // Create a better share text
         const shareText = `${articleData.title}\n\n${articleData.content.substring(0, 100)}...\n\nRead more: ${shareUrl}`;
@@ -194,9 +194,9 @@ async function shareArticle() {
                 url: shareUrl
             });
         } else {
-            // Fallback to clipboard
-            await navigator.clipboard.writeText(shareUrl);
-            showToast('Link copied to clipboard!', 'success');
+            // Fallback to clipboard - NOW ACTUALLY USING shareText
+            await navigator.clipboard.writeText(shareText);
+            showToast('Article details copied to clipboard!', 'success');
         }
         
         // Update share count

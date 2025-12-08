@@ -246,22 +246,28 @@ async function shareArticle(articleId) {
         }
         
         const data = await response.json();
+        
+        // Get the article element to extract title
+        const articleCard = document.querySelector(`.article-card[data-id="${articleId}"]`);
+        const articleTitle = articleCard ? articleCard.querySelector('.article-title').textContent : 'Check out this article';
+        
         const shareUrl = data.share_url || `${window.location.origin}/article-detail.html?id=${articleId}`;
+        const shareText = `${articleTitle}\n\nRead more: ${shareUrl}`;
         
         // Use Web Share API if available
         if (navigator.share) {
             await navigator.share({
-                title: 'Check out this article',
+                title: articleTitle,
+                text: 'Check out this article on ViKayBlog',
                 url: shareUrl
             });
         } else {
-            // Fallback to clipboard
-            await navigator.clipboard.writeText(shareUrl);
+            // Fallback to clipboard - NOW ACTUALLY USING shareText
+            await navigator.clipboard.writeText(shareText);
             showToast('Link copied to clipboard!', 'success');
         }
         
         // Update share count in UI
-        const articleCard = document.querySelector(`.article-card[data-id="${articleId}"]`);
         if (articleCard) {
             const shareCount = articleCard.querySelector('.fa-share').closest('.stat');
             const currentCount = parseInt(shareCount.textContent.match(/\d+/)[0]);
