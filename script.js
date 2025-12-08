@@ -253,7 +253,13 @@ async function shareArticle(articleId) {
         
         const articleTitle = articleCard.querySelector('.article-title').textContent;
         const articleExcerpt = articleCard.querySelector('.article-excerpt').textContent;
-        const shareUrl = data.share_url || `${window.location.origin}/article-detail.html?id=${articleId}`;
+        
+        // Get thumbnail image from the article card
+        const thumbnailImg = articleCard.querySelector('.article-thumbnail img');
+        const articleImage = thumbnailImg ? thumbnailImg.src : `${window.location.origin}/vikayblog_app_icon.png`;
+        
+        // Construct share URL
+        const shareUrl = `${window.location.origin}${data.share_url.startsWith('/') ? data.share_url : '/' + data.share_url}`;
         
         // For clipboard
         const clipboardText = `${articleTitle}\n\n${articleExcerpt}\n\nRead more: ${shareUrl}`;
@@ -270,7 +276,6 @@ async function shareArticle(articleId) {
                     url: shareUrl
                 });
                 
-                // Update UI count
                 updateShareCountUI(articleCard);
                 return;
             } catch (shareError) {

@@ -412,7 +412,7 @@ function updateMetaTags(article) {
     const articleTitle = escapeHtml(article.title);
     const articleDescription = escapeHtml(article.meta_description || article.content.substring(0, 150));
     
-    // FIX: Get image properly
+    // FIX: Get the actual article thumbnail, not just fallback to app icon
     let articleImage = article.thumbnail_url;
     
     // If no thumbnail, check media_urls for images
@@ -426,12 +426,17 @@ function updateMetaTags(article) {
         }
     }
     
-    // Final fallback - use relative path to app icon
+    // Only use app icon as LAST resort
     if (!articleImage) {
         articleImage = `${baseUrl}/vikayblog_app_icon.png`;
     }
     
-    console.log('Meta tag image URL:', articleImage); // Debug log
+    console.log('Meta tags set:', {
+        title: articleTitle,
+        description: articleDescription,
+        image: articleImage,
+        url: articleUrl
+    });
     
     // Update document title
     document.title = `ViKayBlog | ${articleTitle}`;
@@ -440,19 +445,14 @@ function updateMetaTags(article) {
     updateMetaTag('og:title', articleTitle);
     updateMetaTag('og:description', articleDescription);
     updateMetaTag('og:image', articleImage);
-    updateMetaTag('og:image:width', '1200');
-    updateMetaTag('og:image:height', '630');
     updateMetaTag('og:url', articleUrl);
     updateMetaTag('og:type', 'article');
-    updateMetaTag('og:site_name', 'ViKayBlog');
     
     // Update Twitter Card tags
-    updateMetaTag('twitter:card', 'summary_large_image');
     updateMetaTag('twitter:title', articleTitle);
     updateMetaTag('twitter:description', articleDescription);
     updateMetaTag('twitter:image', articleImage);
-    updateMetaTag('twitter:url', articleUrl);
-    updateMetaTag('twitter:site', '@vikayblog');
+    updateMetaTag('twitter:card', 'summary_large_image');
     
     // Update standard meta description
     updateMetaTag('description', articleDescription, 'name');
