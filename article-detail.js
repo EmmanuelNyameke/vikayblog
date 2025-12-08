@@ -181,30 +181,40 @@ async function shareArticle() {
         }
         
         const data = await response.json();
-        const shareUrl = data.share_url || window.location.href;
         
-        // For Web Share API - text is just a fallback
-        const shareFallbackText = `${articleData.title}\n\n${articleData.content.substring(0, 100)}...`;
+        // FIX: Construct proper URLs
+        const baseUrl = window.location.origin;
+        const shareUrl = `${baseUrl}${data.share_url.startsWith('/') ? '' : '/'}${data.share_url}`;
         
-        // For clipboard - full text with URL
-        const clipboardText = `${articleData.title}\n\n${articleData.content.substring(0, 100)}...\n\nRead more: ${shareUrl}`;
+        // Use the image from the API response or from article data
+        const shareImage = data.image || articleData.thumbnail_url;
+        
+        console.log('Sharing with:', {
+            title: data.title,
+            description: data.description,
+            image: shareImage,
+            url: shareUrl
+        });
+        
+        // For Web Share API
+        const shareFallbackText = `${data.title}\n\n${data.description}`;
+        
+        // For clipboard
+        const clipboardText = `${data.title}\n\n${data.description}\n\nRead more: ${shareUrl}`;
         
         // Use Web Share API if available
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: articleData.title,
+                    title: data.title,
                     text: shareFallbackText,
                     url: shareUrl
                 });
                 
-                // Only update count if share was successful
                 updateShareCount();
-                return; // Exit after successful share
+                return;
             } catch (shareError) {
-                // User might have cancelled - check if it's an abort error
                 if (shareError.name !== 'AbortError') {
-                    // If not cancelled, fall back to clipboard
                     await navigator.clipboard.writeText(clipboardText);
                     showToast('Article details copied to clipboard!', 'success');
                     updateShareCount();
@@ -401,7 +411,27 @@ function updateMetaTags(article) {
     const articleUrl = `${baseUrl}/article-detail.html?id=${article.id}`;
     const articleTitle = escapeHtml(article.title);
     const articleDescription = escapeHtml(article.meta_description || article.content.substring(0, 150));
-    const articleImage = article.thumbnail_url || `${baseUrl}/vikayblog_app_icon.png`;
+    
+    // FIX: Get image properly
+    let articleImage = article.thumbnail_url;
+    
+    // If no thumbnail, check media_urls for images
+    if (!articleImage && article.media_urls && article.media_urls.length > 0) {
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+        for (const mediaUrl of article.media_urls) {
+            if (imageExtensions.some(ext => mediaUrl.toLowerCase().endsWith(ext))) {
+                articleImage = mediaUrl;
+                break;
+            }
+        }
+    }
+    
+    // Final fallback - use relative path to app icon
+    if (!articleImage) {
+        articleImage = `${baseUrl}/vikayblog_app_icon.png`;
+    }
+    
+    console.log('Meta tag image URL:', articleImage); // Debug log
     
     // Update document title
     document.title = `ViKayBlog | ${articleTitle}`;
@@ -410,17 +440,24 @@ function updateMetaTags(article) {
     updateMetaTag('og:title', articleTitle);
     updateMetaTag('og:description', articleDescription);
     updateMetaTag('og:image', articleImage);
+    updateMetaTag('og:image:width', '1200');
+    updateMetaTag('og:image:height', '630');
     updateMetaTag('og:url', articleUrl);
+    updateMetaTag('og:type', 'article');
+    updateMetaTag('og:site_name', 'ViKayBlog');
     
     // Update Twitter Card tags
+    updateMetaTag('twitter:card', 'summary_large_image');
     updateMetaTag('twitter:title', articleTitle);
     updateMetaTag('twitter:description', articleDescription);
     updateMetaTag('twitter:image', articleImage);
+    updateMetaTag('twitter:url', articleUrl);
+    updateMetaTag('twitter:site', '@vikayblog');
     
     // Update standard meta description
     updateMetaTag('description', articleDescription, 'name');
     
-    // Update canonical URL if needed
+    // Update canonical URL
     updateMetaTag('canonical', articleUrl, 'rel');
 }
 
