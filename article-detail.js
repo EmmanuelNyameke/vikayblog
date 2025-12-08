@@ -37,6 +37,10 @@ async function loadArticle() {
         }
         
         articleData = await response.json();
+
+        // Update meta tags for social sharing
+        updateMetaTags(articleData);
+
         renderArticle();
     } catch (error) {
         console.error('Error loading article:', error);
@@ -177,7 +181,10 @@ async function shareArticle() {
         }
         
         const data = await response.json();
-        const shareUrl = data.share_url || `${window.location.origin}/article-detail.html?id=${articleData.id}`;
+        const shareUrl = data.share_url || window.location.href; // Use current page URL
+        
+        // Create a better share text
+        const shareText = `${articleData.title}\n\n${articleData.content.substring(0, 100)}...\n\nRead more: ${shareUrl}`;
         
         // Use Web Share API if available
         if (navigator.share) {
@@ -362,6 +369,61 @@ function formatDate(dateString) {
         hour: '2-digit',
         minute: '2-digit'
     });
+}
+
+// Function to update meta tags dynamically
+function updateMetaTags(article) {
+    const baseUrl = window.location.origin;
+    const articleUrl = `${baseUrl}/article-detail.html?id=${article.id}`;
+    const articleTitle = escapeHtml(article.title);
+    const articleDescription = escapeHtml(article.meta_description || article.content.substring(0, 150));
+    const articleImage = article.thumbnail_url || `${baseUrl}/vikayblog_app_icon.png`;
+    
+    // Update document title
+    document.title = `ViKayBlog | ${articleTitle}`;
+    
+    // Update Open Graph tags
+    updateMetaTag('og:title', articleTitle);
+    updateMetaTag('og:description', articleDescription);
+    updateMetaTag('og:image', articleImage);
+    updateMetaTag('og:url', articleUrl);
+    
+    // Update Twitter Card tags
+    updateMetaTag('twitter:title', articleTitle);
+    updateMetaTag('twitter:description', articleDescription);
+    updateMetaTag('twitter:image', articleImage);
+    
+    // Update standard meta description
+    updateMetaTag('description', articleDescription, 'name');
+    
+    // Update canonical URL if needed
+    updateMetaTag('canonical', articleUrl, 'rel');
+}
+
+// Helper function to update meta tags
+function updateMetaTag(property, content, attr = 'property') {
+    let tag = document.querySelector(`meta[${attr}="${property}"]`);
+    
+    if (!tag && attr === 'rel') {
+        tag = document.querySelector(`link[${attr}="${property}"]`);
+    }
+    
+    if (tag) {
+        tag.setAttribute('content', content);
+    } else {
+        // Create the tag if it doesn't exist
+        if (attr === 'rel') {
+            tag = document.createElement('link');
+            tag.setAttribute('rel', property);
+            tag.setAttribute('href', content);
+            document.head.appendChild(tag);
+        } else {
+            tag = document.createElement('meta');
+            tag.setAttribute(attr, property);
+            tag.setAttribute('content', content);
+            document.head.appendChild(tag);
+        }
+    }
 }
 
 // Escape HTML
