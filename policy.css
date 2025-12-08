@@ -1,0 +1,227 @@
+/* ============================
+   POLICY PAGES STYLES
+   ============================ */
+
+.policy-container {
+    background: var(--bg-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 48px;
+    margin: 50px 0;
+    border: 1px solid var(--border-light);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.policy-header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 2px solid var(--border-light);
+}
+
+.policy-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-color);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.policy-header h1 i {
+    color: var(--primary-color);
+    font-size: 2.2rem;
+}
+
+.policy-update {
+    color: var(--text-lighter);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.policy-update span {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.policy-content {
+    line-height: 1.8;
+    color: var(--text-color);
+    font-size: 1.15rem;
+}
+
+.policy-section {
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.policy-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.policy-section h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.policy-section h2::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 24px;
+    background: var(--primary-color);
+    border-radius: var(--radius-sm);
+}
+
+.policy-section p {
+    margin-bottom: 20px;
+    text-align: justify;
+}
+
+.policy-section ul {
+    padding-left: 24px;
+    margin-bottom: 24px;
+}
+
+.policy-section li {
+    margin-bottom: 12px;
+    position: relative;
+    padding-left: 10px;
+}
+
+.policy-section li::before {
+    content: '•';
+    color: var(--primary-color);
+    font-weight: bold;
+    position: absolute;
+    left: -15px;
+    font-size: 1.5rem;
+}
+
+.policy-section strong {
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.policy-section a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.policy-section a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.policy-consent {
+    background: var(--primary-extra-light);
+    padding: 32px;
+    border-radius: var(--radius);
+    margin-top: 48px;
+    text-align: center;
+    border: 2px solid var(--primary-light);
+}
+
+.policy-consent p {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin: 0;
+}
+
+.footer-links .active {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.footer-links .active::after {
+    width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .policy-container {
+        padding: 40px;
+    }
+    
+    .policy-header h1 {
+        font-size: 2.2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .policy-container {
+        padding: 32px;
+        margin: 32px 0;
+    }
+    
+    .policy-header {
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+    }
+    
+    .policy-header h1 {
+        font-size: 1.8rem;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .policy-section {
+        margin-bottom: 32px;
+        padding-bottom: 32px;
+    }
+    
+    .policy-section h2 {
+        font-size: 1.4rem;
+    }
+    
+    .policy-content {
+        font-size: 1.05rem;
+    }
+    
+    .policy-consent {
+        padding: 24px;
+        margin-top: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .policy-container {
+        padding: 24px;
+        margin: 24px 0;
+    }
+    
+    .policy-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .policy-update {
+        font-size: 0.95rem;
+    }
+    
+    .policy-section h2 {
+        font-size: 1.2rem;
+    }
+    
+    .policy-section li {
+        margin-bottom: 10px;
+    }
+    
+    .policy-consent {
+        padding: 20px;
+    }
+}
