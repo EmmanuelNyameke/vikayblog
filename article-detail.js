@@ -183,29 +183,53 @@ async function shareArticle() {
         const data = await response.json();
         const shareUrl = data.share_url || window.location.href;
         
-        // Create a better share text
-        const shareText = `${articleData.title}\n\n${articleData.content.substring(0, 100)}...\n\nRead more: ${shareUrl}`;
+        // For Web Share API - text is just a fallback
+        const shareFallbackText = `${articleData.title}\n\n${articleData.content.substring(0, 100)}...`;
+        
+        // For clipboard - full text with URL
+        const clipboardText = `${articleData.title}\n\n${articleData.content.substring(0, 100)}...\n\nRead more: ${shareUrl}`;
         
         // Use Web Share API if available
         if (navigator.share) {
-            await navigator.share({
-                title: articleData.title,
-                text: articleData.content.substring(0, 100) + '...',
-                url: shareUrl
-            });
-        } else {
-            // Fallback to clipboard - NOW ACTUALLY USING shareText
-            await navigator.clipboard.writeText(shareText);
-            showToast('Article details copied to clipboard!', 'success');
+            try {
+                await navigator.share({
+                    title: articleData.title,
+                    text: shareFallbackText,
+                    url: shareUrl
+                });
+                
+                // Only update count if share was successful
+                updateShareCount();
+                return; // Exit after successful share
+            } catch (shareError) {
+                // User might have cancelled - check if it's an abort error
+                if (shareError.name !== 'AbortError') {
+                    // If not cancelled, fall back to clipboard
+                    await navigator.clipboard.writeText(clipboardText);
+                    showToast('Article details copied to clipboard!', 'success');
+                    updateShareCount();
+                }
+                return;
+            }
         }
         
-        // Update share count
-        const shareCount = document.querySelector('.fa-share').closest('.article-detail-stat');
-        const currentCount = parseInt(shareCount.textContent.match(/\d+/)[0]);
-        shareCount.innerHTML = `<i class="fas fa-share"></i> ${currentCount + 1} Shares`;
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(clipboardText);
+        showToast('Article details copied to clipboard!', 'success');
+        updateShareCount();
+        
     } catch (error) {
         console.error('Error sharing article:', error);
         showToast('Failed to share article. Please try again.', 'error');
+    }
+}
+
+// Helper function to update share count
+function updateShareCount() {
+    const shareCount = document.querySelector('.fa-share').closest('.article-detail-stat');
+    if (shareCount) {
+        const currentCount = parseInt(shareCount.textContent.match(/\d+/)[0]) || 0;
+        shareCount.innerHTML = `<i class="fas fa-share"></i> ${currentCount + 1} Shares`;
     }
 }
 

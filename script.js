@@ -247,35 +247,59 @@ async function shareArticle(articleId) {
         
         const data = await response.json();
         
-        // Get the article element to extract title
+        // Get article details from the card
         const articleCard = document.querySelector(`.article-card[data-id="${articleId}"]`);
-        const articleTitle = articleCard ? articleCard.querySelector('.article-title').textContent : 'Check out this article';
+        if (!articleCard) return;
         
+        const articleTitle = articleCard.querySelector('.article-title').textContent;
+        const articleExcerpt = articleCard.querySelector('.article-excerpt').textContent;
         const shareUrl = data.share_url || `${window.location.origin}/article-detail.html?id=${articleId}`;
-        const shareText = `${articleTitle}\n\nRead more: ${shareUrl}`;
+        
+        // For clipboard
+        const clipboardText = `${articleTitle}\n\n${articleExcerpt}\n\nRead more: ${shareUrl}`;
+        
+        // For Web Share API
+        const shareFallbackText = `${articleTitle}\n\n${articleExcerpt}`;
         
         // Use Web Share API if available
         if (navigator.share) {
-            await navigator.share({
-                title: articleTitle,
-                text: 'Check out this article on ViKayBlog',
-                url: shareUrl
-            });
-        } else {
-            // Fallback to clipboard - NOW ACTUALLY USING shareText
-            await navigator.clipboard.writeText(shareText);
-            showToast('Link copied to clipboard!', 'success');
+            try {
+                await navigator.share({
+                    title: articleTitle,
+                    text: shareFallbackText,
+                    url: shareUrl
+                });
+                
+                // Update UI count
+                updateShareCountUI(articleCard);
+                return;
+            } catch (shareError) {
+                if (shareError.name !== 'AbortError') {
+                    await navigator.clipboard.writeText(clipboardText);
+                    showToast('Article details copied to clipboard!', 'success');
+                    updateShareCountUI(articleCard);
+                }
+                return;
+            }
         }
         
-        // Update share count in UI
-        if (articleCard) {
-            const shareCount = articleCard.querySelector('.fa-share').closest('.stat');
-            const currentCount = parseInt(shareCount.textContent.match(/\d+/)[0]);
-            shareCount.innerHTML = `<i class="fas fa-share"></i> ${currentCount + 1}`;
-        }
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(clipboardText);
+        showToast('Article details copied to clipboard!', 'success');
+        updateShareCountUI(articleCard);
+        
     } catch (error) {
         console.error('Error sharing article:', error);
         showToast('Failed to share article. Please try again.', 'error');
+    }
+}
+
+// Helper function to update UI share count
+function updateShareCountUI(articleCard) {
+    const shareCount = articleCard.querySelector('.fa-share').closest('.stat');
+    if (shareCount) {
+        const currentCount = parseInt(shareCount.textContent.match(/\d+/)[0]) || 0;
+        shareCount.innerHTML = `<i class="fas fa-share"></i> ${currentCount + 1}`;
     }
 }
 
