@@ -246,7 +246,7 @@ async function shareArticle(articleId) {
         }
         
         const data = await response.json();
-        const shareUrl = data.share_url || `https://vikayblog.com/articles/${articleId}`;
+        const shareUrl = data.share_url || `${window.location.origin}/article-detail.html?id=${articleId}`;
         
         // Use Web Share API if available
         if (navigator.share) {
